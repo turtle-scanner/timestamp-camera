@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>공부 스탬프 - 전문상담 임용 수석 합격</title>
+    
+    <!-- PWA Manifest & Meta Tags -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="공부 스탬프">
+    <link rel="apple-touch-icon" href="https://img.icons8.com/isometric/512/camera.png">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Noto+Sans+KR:wght@300;400;600;800&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            500: '#06b6d4',
+                            600: '#0891b2',
+                            900: '#164e63',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Noto Sans KR', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                        gowun: ['Gowun Dodum', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased select-none h-screen w-screen overflow-hidden flex flex-col justify-between">
+
+    <!-- Flash Effect Overlay -->
+    <div id="flashOverlay" class="fixed inset-0 bg-white opacity-0 pointer-events-none z-50 transition-opacity duration-150"></div>
+
+    <!-- Header Navigation -->
+    <header class="relative z-30 px-4 py-2.5 flex items-center justify-between bg-slate-950/70 backdrop-blur-md border-b border-white/10">
+        <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-cyan-400 animate-pulse"></span>
+            <div>
+                <h1 class="font-extrabold text-base tracking-tight bg-gradient-to-r from-cyan-400 via-teal-300 to-amber-300 bg-clip-text text-transparent">
+                    공부 스탬프 📸
+                </h1>
+                <!-- D-Day Indicator in Header -->
+                <span id="headerDDay" class="text-[10px] font-bold text-amber-400">2027 전문상담 1차 D-103</span>
+            </div>
+        </div>
+        
+        <div class="flex items-center gap-2">
+            <!-- Attendance Calendar Toggle -->
+            <button id="btnOpenCalendar" class="p-2 rounded-full bg-slate-800/80 hover:bg-slate-700 active:scale-95 transition text-emerald-400" title="출석부 잔디 확인">
+                <span class="text-sm">🌿</span>
+            </button>
+
+            <!-- Custom Location / Tag Button -->
+            <button id="btnEditLocation" class="p-2 rounded-full bg-slate-800/80 hover:bg-slate-700 active:scale-95 transition text-cyan-300" title="문구/닉네임 설정">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+            </button>
+
+            <!-- Switch Camera -->
+            <button id="btnSwitchCamera" class="p-2 rounded-full bg-slate-800/80 hover:bg-slate-700 active:scale-95 transition text-slate-200" title="전면/후면 카메라 전환">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+            </button>
+            
+            <!-- Install PWA App Button -->
+            <button id="btnInstallPwa" class="hidden px-2.5 py-1 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 text-[11px] font-bold text-white shadow-lg active:scale-95 transition">
+                📲 앱 설치
+            </button>
+        </div>
+    </header>
+
+    <!-- Study Stopwatch Bar (Top Floating Control) -->
+    <div class="relative z-30 bg-slate-900/80 backdrop-blur-md px-4 py-2 border-b border-white/10 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-cyan-400">⏱️ 오늘 순공:</span>
+            <span id="timerDisplay" class="font-display font-black text-lg text-white tracking-wider">00:00:00</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+            <button id="btnResetTimer" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 active:scale-95 transition">
+                ⏱️ 초기화
+            </button>
+            <button id="btnPauseTimer" class="hidden"></button>
+        </div>
+    </div>
+
+    <!-- Main Smartphone 9:16 Camera Viewport Container -->
+    <main class="relative flex-1 w-full overflow-hidden bg-slate-950 flex flex-col items-center justify-center">
+        
+        <!-- Live Video Element for Real Mobile Webcams (iOS Safari Compatible) -->
+        <video id="videoElement" autoplay playsinline webkit-playsinline muted class="absolute inset-0 w-full h-full object-cover z-10"></video>
+        <canvas id="liveViewportCanvas" class="absolute inset-0 w-full h-full object-cover z-0"></canvas>
+        <canvas id="snapshotCanvas" class="hidden"></canvas>
+
+        <!-- Smartphone Watermark Overlay Placeholder -->
+        <div id="stampOverlay" class="absolute bottom-4 left-3 right-3 pointer-events-none z-50 transition-all duration-300">
+            <!-- Dynamic Stamp Rendered via JS -->
+        </div>
+
+        <!-- iOS Camera Enable Overlay / Fallback Button (Shows if camera auto-start is blocked by Safari) -->
+        <div id="iosCamBanner" class="absolute top-4 left-4 right-4 z-40 bg-amber-500/90 text-slate-950 font-bold px-3 py-2 rounded-xl text-xs flex items-center justify-between shadow-lg">
+            <span>📱 아이폰 카메라 권한 켜기 / 사진 찍기</span>
+            <button id="btnIosCamEnable" class="bg-slate-950 text-amber-300 px-3 py-1 rounded-lg font-black text-xs active:scale-95 transition">
+                📸 화면 켜기
+            </button>
+        </div>
+
+        <!-- Right Bottom Floating Thumb Button (Super Easy Right-Hand Access) -->
+        <button id="btnStartTimer" class="fixed bottom-20 right-4 z-[9999] px-5 py-4 rounded-full font-black text-sm bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-2xl shadow-cyan-500/50 border-2 border-cyan-300 active:scale-90 transition duration-150 flex items-center justify-center gap-2 tracking-tight cursor-pointer" title="공부 시작 & 캡처">
+            <span>▶ 시작 & 📸 촬영</span>
+        </button>
+
+        <!-- iOS Fallback Native Camera File Input -->
+        <input type="file" id="fileInput" accept="image/*" class="hidden">
+        <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden">
+    </main>
+
+    <!-- Bottom Controls & Theme Picker -->
+    <footer class="relative z-30 bg-slate-950 border-t border-white/10 px-4 pt-3 pb-6 flex flex-col gap-3">
+        
+        <!-- Theme Selection Pill Tabs -->
+        <div class="flex items-center justify-center gap-2 overflow-x-auto no-scrollbar py-0.5">
+            <button data-theme="minimal" class="theme-btn active px-3 py-1 rounded-full text-xs font-semibold border transition">
+                ✨ 미니멀 날짜+시간
+            </button>
+            <button data-theme="dday_study" class="theme-btn px-3 py-1 rounded-full text-xs font-semibold border transition">
+                🏆 D-Day + 순공
+            </button>
+            <button data-theme="badge" class="theme-btn px-3 py-1 rounded-full text-xs font-semibold border transition">
+                🔥 카톡 수석 뱃지
+            </button>
+            <button data-theme="grass" class="theme-btn px-3 py-1 rounded-full text-xs font-semibold border transition">
+                🌿 출석 잔디
+            </button>
+        </div>
+
+        <!-- Hidden legacy buttons kept for JS binding compatibility -->
+        <div class="hidden">
+            <button id="btnUploadPhoto"></button>
+            <button id="btnShutter"></button>
+            <button id="btnCustomNote"></button>
+        </div>
+
+        <!-- Creator & License Credit Footer Line -->
+        <div class="text-center text-[10px] text-slate-400 font-medium pt-1 border-t border-white/10 tracking-tight">
+            만든이: <span class="text-cyan-400 font-semibold">상담 천개의 문 (2026.8.10)</span> | MIT License
+        </div>
+    </footer>
+
+    <!-- Result Modal (Captured Photo Preview) -->
+    <div id="resultModal" class="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex flex-col justify-between hidden transition-all duration-200">
+        <div class="p-4 flex items-center justify-between border-b border-white/10">
+            <h2 class="text-sm font-bold text-slate-200">📸 인증샷 완성본 (갤러리 저장됨)</h2>
+            <button id="btnCloseModal" class="p-2 text-slate-400 hover:text-white text-xl">✕</button>
+        </div>
+        
+        <div class="flex-1 flex items-center justify-center p-4 overflow-hidden">
+            <img id="resultImage" class="max-h-full max-w-full rounded-2xl shadow-2xl border border-white/10 object-contain select-auto pointer-events-auto" title="손가락으로 2초간 꾹 누르면 저장 메뉴가 뜹니다">
+        </div>
+
+        <div class="p-4 bg-slate-950 border-t border-white/10 text-center">
+            <button onclick="document.getElementById('btnCloseModal').click()" class="w-full py-3 rounded-xl bg-slate-900 border border-cyan-500/40 text-cyan-300 font-bold text-xs shadow-lg active:scale-95 transition flex items-center justify-center gap-2">
+                <span>✕ 터치하여 카메라 촬영 모드로 돌아가기 (2초 후 자동 복귀)</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Monthly Attendance Grass Calendar Modal -->
+    <div id="calendarModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-white/20 rounded-2xl p-5 w-full max-w-sm flex flex-col gap-4 shadow-2xl">
+            <div class="flex items-center justify-between">
+                <h3 class="text-base font-bold text-emerald-400 flex items-center gap-2">
+                    🌿 월간 열공 출석 잔디
+                </h3>
+                <button id="btnCloseCalendar" class="text-slate-400 hover:text-white text-lg">✕</button>
+            </div>
+            
+            <p class="text-xs text-slate-400">매일 타임스탬프 촬영 시 초록색 출석 잔디가 심어집니다!</p>
+
+            <div id="calendarGrid" class="grid grid-cols-7 gap-1.5 py-2">
+                <!-- Days rendered dynamically -->
+            </div>
+
+            <div class="flex items-center justify-between text-xs text-slate-300 bg-slate-800 px-3 py-2 rounded-xl">
+                <span>이번 달 출석 달성:</span>
+                <span id="attendanceCount" class="font-bold text-emerald-400">0일 달성! 🎉</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Location / Custom Note Edit Modal -->
+    <div id="editModal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-white/20 rounded-2xl p-5 w-full max-w-sm flex flex-col gap-4 shadow-2xl">
+            <h3 class="text-base font-bold text-cyan-300 flex items-center gap-2">
+                📍 스탬프 문구 & 닉네임 설정
+            </h3>
+            
+            <div class="flex flex-col gap-1.5">
+                <label class="text-xs text-slate-400">닉네임 / 성함</label>
+                <input id="inputNickname" type="text" placeholder="예: 천개의문, 초수 인천" class="bg-slate-800 border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-cyan-400">
+            </div>
+
+            <div class="flex flex-col gap-1.5">
+                <label class="text-xs text-slate-400">장소 / 위치 이름</label>
+                <input id="inputLocation" type="text" placeholder="예: 인천 연수구 독서실, 우리집 공부방" class="bg-slate-800 border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-cyan-400">
+            </div>
+
+            <div class="flex flex-col gap-1.5">
+                <label class="text-xs text-slate-400">나만의 다짐 / 카톡 응원 문구</label>
+                <input id="inputCustomNote" type="text" placeholder="예: 2027 전문상담 수석 합격!, 102 마스터북 완료" class="bg-slate-800 border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-cyan-400">
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-2">
+                <button id="btnCancelEdit" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700">취소</button>
+                <button id="btnSaveEdit" class="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-500 text-slate-950 hover:bg-cyan-400">저장하기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PWA Helper Instructions Banner -->
+    <div id="pwaHelpBanner" class="fixed top-24 left-4 right-4 z-40 bg-slate-900/90 border border-cyan-500/30 rounded-2xl p-3 shadow-xl backdrop-blur-md flex items-center justify-between hidden">
+        <div class="flex items-center gap-3">
+            <span class="text-2xl">📲</span>
+            <div class="text-xs">
+                <p class="font-bold text-cyan-300">핸드폰에 카메라 앱 설치하기</p>
+                <p class="text-slate-400">브라우저 메뉴에서 <span class="text-white font-semibold">'홈 화면에 추가'</span>를 눌러보세요!</p>
+            </div>
+        </div>
+        <button id="btnCloseHelp" class="text-slate-400 hover:text-white px-2 py-1 text-sm">✕</button>
+    </div>
+
+    <script src="app.js?v=20260810_999"></script>
+</body>
+</html>
