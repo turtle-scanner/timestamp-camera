@@ -342,7 +342,48 @@ document.addEventListener('DOMContentLoaded', () => {
         initCamera();
     });
 
-    // Live Date/Time Formatter
+    // Counselor Motivational Quotes & Core Theory Database
+    const counselorQuotes = [
+        { scholar: "칼 로저스 (Carl Rogers)", theory: "인간중심 상담 - 자아실현", quote: "어느 누구도 나를 바꿀 수 없지만, 나 스스로 완벽한 성장의 힘을 가지고 있다. 🌱" },
+        { scholar: "알프레드 아들러 (Alfred Adler)", theory: "개별심리학 - 열등감 보상", quote: "과거의 상처에 갇히지 마라. 우리에겐 목적을 향해 삶을 재창조할 힘이 있다. 🏆" },
+        { scholar: "알버트 엘리스 (Albert Ellis)", theory: "REBT - 합리적 신념", quote: "나를 괴롭히는 것은 시험 자체가 아니라, 반드시 합격해야 한다는 당위적 생각이다. 💡" },
+        { scholar: "빅터 프랭클 (Viktor Frankl)", theory: "의미치료 - 실존적 의미", quote: "시련 자체에는 의미가 없지만, 그 시련을 견뎌내는 나의 태도 속에 고귀한 의미가 피어난다. ✨" },
+        { scholar: "아론 벡 (Aaron Beck)", theory: "인지치료 - 자동적 사고 재구조화", quote: "생각을 바꾸면 감정과 행동이 바뀌고, 결국 내 삶과 합격의 미래가 바뀐다. 🧠" },
+        { scholar: "에릭 번 (Eric Berne)", theory: "교류분석 - I'm OK, You're OK", quote: "나는 OK이고 너도 OK이다. 우리는 누구나 수석 합격을 이뤄낼 주인공이다. 👍" },
+        { scholar: "프리츠 펄스 (Fritz Perls)", theory: "게슈탈트 - 지금-여기 (Here & Now)", quote: "과거의 미해결 과제에 집착하지 마라. 지금-여기(Here & Now)에 온전히 깨어있으라. ⚡" },
+        { scholar: "살바도르 미누친 (Minuchin)", theory: "구조적 가족치료 - 명확한 경계선", quote: "명확한 경계선을 세울 때 내 안의 자율성과 연대감이 비로소 피어난다. 🧱" },
+        { scholar: "카를 융 (Carl Jung)", theory: "분석심리학 - 개성화 (Individuation)", quote: "밖을 보는 자는 꿈을 꾸지만, 내면을 들여다보는 자는 비로소 깨어난다. 🌟" },
+        { scholar: "마틴 셀리그만 (Seligman)", theory: "긍정심리학 - PERMA 강점", quote: "학습된 무기력에서 벗어나라. 내 안의 강점과 긍정 정서가 성취의 큰 문을 연다. 🔥" }
+    ];
+
+    let currentQuoteIndex = 0;
+    const quoteScholarEl = document.getElementById('quoteScholar');
+    const quoteTheoryEl = document.getElementById('quoteTheory');
+    const quoteTextEl = document.getElementById('quoteText');
+    const quoteBanner = document.getElementById('quoteBanner');
+
+    function updateQuoteUI() {
+        if (!quoteScholarEl || !quoteTextEl) return;
+        const item = counselorQuotes[currentQuoteIndex];
+        quoteScholarEl.textContent = item.scholar;
+        if (quoteTheoryEl) quoteTheoryEl.textContent = item.theory;
+        quoteTextEl.textContent = `"${item.quote}"`;
+    }
+
+    function nextQuote() {
+        currentQuoteIndex = (currentQuoteIndex + 1) % counselorQuotes.length;
+        updateQuoteUI();
+    }
+
+    if (quoteBanner) {
+        quoteBanner.addEventListener('click', nextQuote);
+    }
+
+    // Auto Roll Quote every 7 seconds
+    setInterval(nextQuote, 7000);
+    updateQuoteUI();
+
+    // Live Date/Time Formatter (Midnight-based Precise D-Day Calculation)
     function getFormattedTime() {
         const now = new Date();
         const year = now.getFullYear();
@@ -353,11 +394,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const minutes = String(now.getMinutes()).padStart(2, '0');
         const seconds = String(now.getSeconds()).padStart(2, '0');
 
-        // Target Exam Date (2026-11-21 approx for 2027 exam)
-        const examDate = new Date('2026-11-21');
-        const diffTime = examDate - now;
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        const dDayText = diffDays > 0 ? `D-${diffDays}` : `D-DAY`;
+        // Target Exam Date (2026-11-21 for 2027 Exam, midnight exact comparison)
+        const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const examDate = new Date(2026, 10, 21); // Nov 21, 2026
+        const diffTime = examDate - todayMidnight;
+        const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+        
+        let dDayText = 'D-DAY';
+        if (diffDays > 0) {
+            dDayText = `D-${diffDays}`;
+        } else if (diffDays < 0) {
+            dDayText = `D+${Math.abs(diffDays)}`;
+        }
 
         return { year, month, date, day, hours, minutes, seconds, dDayText, fullDateKey: `${year}-${month}-${date}` };
     }
@@ -373,6 +421,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderLiveStamp() {
         const t = getFormattedTime();
         const studyTimeText = formatTime(timerSeconds);
+        const qItem = counselorQuotes[currentQuoteIndex];
         let html = '';
 
         if (currentTheme === 'dday_study') {
@@ -386,9 +435,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         <span class="font-display font-black text-2xl text-white tracking-tight">${t.hours}:${t.minutes}:${t.seconds}</span>
                         <span class="text-xs font-semibold text-slate-300">${t.year}.${t.month}.${t.date} (${t.day})</span>
                     </div>
-                    <div class="flex items-center justify-between text-[11px] text-slate-400">
-                        <span>👤 ${userNickname} | ${userWeather} | 📍 ${userLocation}</span>
-                        <span class="text-cyan-300 font-bold">${userCustomNote}</span>
+                    <div class="text-[10px] text-amber-300 font-medium truncate pt-0.5 border-t border-white/10">
+                        💡 <b>${qItem.scholar}</b>: "${qItem.quote}"
                     </div>
                 </div>
             `;
@@ -400,9 +448,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         <span class="font-black text-xs bg-black/20 px-2 py-0.5 rounded-full">${t.dDayText}</span>
                     </div>
                     <div class="font-display font-black text-3xl leading-none my-0.5">${t.hours}:${t.minutes}:${t.seconds}</div>
-                    <div class="flex items-center justify-between text-[11px] font-semibold opacity-95">
-                        <span>⏱️ 순공: ${studyTimeText} | ${t.month}/${t.date}(${t.day})</span>
-                        <span>👤 ${userNickname}</span>
+                    <div class="text-[10px] text-amber-200 font-medium truncate">
+                        💡 <b>${qItem.scholar}</b>: "${qItem.quote}"
                     </div>
                 </div>
             `;
@@ -417,6 +464,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         <span>📍 ${userLocation}</span>
                         <span class="text-cyan-400 font-bold">⏱️ ${studyTimeText}</span>
                     </div>
+                    <div class="text-[10px] text-amber-300 font-medium truncate pt-0.5 border-t border-white/10">
+                        💡 <b>${qItem.scholar}</b>: "${qItem.quote}"
+                    </div>
                 </div>
             `;
         } else if (currentTheme === 'grass') {
@@ -427,7 +477,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <span class="text-emerald-300">${t.dDayText}</span>
                     </div>
                     <div class="font-display font-black text-2xl text-white">${t.hours}:${t.minutes}:${t.seconds}</div>
-                    <div class="text-[11px] text-emerald-200">⏱️ 오늘 순공: ${studyTimeText} | 📍 ${userLocation}</div>
+                    <div class="text-[10px] text-emerald-200 truncate">💡 <b>${qItem.scholar}</b>: "${qItem.quote}"</div>
                 </div>
             `;
         }
@@ -836,10 +886,16 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.shadowOffsetX = 1;
             ctx.shadowOffsetY = 1;
 
-            // Top Left: Exam D-Day Banner
+            const qItem = counselorQuotes[currentQuoteIndex];
+
+            // Top Left: Exam D-Day Banner & Counselor Quote
             ctx.fillStyle = '#fbbf24';
-            ctx.font = `800 ${width * 0.040}px sans-serif`;
-            ctx.fillText(`🏆 2027 전문상담 ${t.dDayText}`, topX, topY + (height * 0.035));
+            ctx.font = `800 ${width * 0.038}px sans-serif`;
+            ctx.fillText(`🏆 2027 전문상담 ${t.dDayText}`, topX, topY + (height * 0.032));
+
+            ctx.fillStyle = '#67e8f9';
+            ctx.font = `700 ${width * 0.026}px sans-serif`;
+            ctx.fillText(`💡 ${qItem.scholar}: "${qItem.quote}"`, topX, topY + (height * 0.068));
 
             // Bottom Area: Date & Time ONLY (2-5반 removed)
             const botBoxHeight = height * 0.10;
