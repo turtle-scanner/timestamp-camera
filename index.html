@@ -249,7 +249,7 @@
 
             <div class="flex flex-col gap-1.5">
                 <label class="text-xs text-slate-400">장소 / 위치 이름</label>
-                <input id="inputLocation" type="text" placeholder="예: 인천 연수구 독서실, 우리집 공부방" class="bg-slate-800 border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-cyan-400">
+                <input id="inputLocation" type="text" placeholder="예: 나만의 공부방, 독서실" class="bg-slate-800 border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-cyan-400">
             </div>
 
             <div class="flex flex-col gap-1.5">
@@ -317,8 +317,8 @@
         let timerInterval = null;
         let currentStream = null;
         let facingMode = 'environment';
-        let userNickname = '천개의문 / 초수 / 인천';
-        let userLocation = '인천 연수구 독서실';
+        let userNickname = '수석 합격';
+        let userLocation = '';
         let capturedBlob = null;
         const daysKo = ['일', '월', '화', '수', '목', '금', '토'];
 
@@ -648,6 +648,6 @@
         initCamera().catch(() => {});
     })();
     </script>
-    <script src="app.js?v=20260811_SUPER_CLEAN_MINIMAL_STAMP_V1"></script>
+    <script src="app.js?v=20260811_REMOVE_INCHEON_YEONSU_LOCATION"></script>
 </body>
 </html>
