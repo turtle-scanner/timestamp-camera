@@ -1,4 +1,4 @@
-const CACHE_NAME = 'timestamp-camera-v20260811-ultimate-3-upgrade-features-complete';
+const CACHE_NAME = 'timestamp-camera-v20260811-add-mood-options-not-focused-identity-diffusion';
 
 self.addEventListener('install', event => {
   self.skipWaiting();
