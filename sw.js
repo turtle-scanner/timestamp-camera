@@ -1,4 +1,4 @@
-const CACHE_NAME = 'timestamp-camera-v20260811-app-js-totally-cleaned-location-none';
+const CACHE_NAME = 'timestamp-camera-v20260811-zero-flicker-smooth-update';
 
 self.addEventListener('install', event => {
   self.skipWaiting();

@@ -443,31 +443,40 @@
 
             if (!stampOverlay) return;
 
-            stampOverlay.innerHTML = `
-                <div class="bg-slate-900/85 backdrop-blur-md px-4 py-3 rounded-2xl border border-cyan-500/30 shadow-2xl flex flex-col gap-1.5 text-left">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-1.5 flex-wrap">
-                            <span class="text-amber-400 font-black text-xs tracking-wider">🏆 2027 전문상담 1차 ${t.dDayText}</span>
-                            <span class="bg-cyan-500/20 text-cyan-300 border border-cyan-400/40 text-[10px] font-bold px-1.5 py-0.5 rounded-md">${subjectTag}</span>
-                            <span class="bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 text-[10px] font-bold px-1.5 py-0.5 rounded-md">${moodTag}</span>
+            // In-Place Update to Prevent Any Flicker
+            let liveClock = document.getElementById('stampLiveClock');
+            let liveProgressText = document.getElementById('stampProgressText');
+            let liveProgressBar = document.getElementById('stampProgressBar');
+
+            if (!liveClock || !stampOverlay.firstElementChild) {
+                stampOverlay.innerHTML = `
+                    <div class="bg-slate-900/85 backdrop-blur-md px-4 py-3 rounded-2xl border border-cyan-500/30 shadow-2xl flex flex-col gap-1.5 text-left">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                <span class="text-amber-400 font-black text-xs tracking-wider">🏆 2027 전문상담 1차 ${t.dDayText}</span>
+                                <span class="bg-cyan-500/20 text-cyan-300 border border-cyan-400/40 text-[10px] font-bold px-1.5 py-0.5 rounded-md">${subjectTag}</span>
+                                <span class="bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 text-[10px] font-bold px-1.5 py-0.5 rounded-md">${moodTag}</span>
+                            </div>
+                            <span class="text-xs font-bold text-amber-300 shrink-0">${t.year}.${t.month}.${t.date} (${t.day})</span>
                         </div>
-                        <span class="text-xs font-bold text-amber-300 shrink-0">${t.year}.${t.month}.${t.date} (${t.day})</span>
+                        <div class="flex items-baseline justify-between py-0.5">
+                            <span id="stampLiveClock" class="font-display font-black text-2xl text-white tracking-tight leading-none">${t.hours}:${t.minutes}:${t.seconds}</span>
+                            <span id="stampProgressText" class="text-[11px] font-bold text-amber-300">🎯 목표 달성: ${progressPct}% (${studyTimeText}/${targetHours}시간)</span>
+                        </div>
+                        <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden border border-white/10">
+                            <div id="stampProgressBar" class="bg-gradient-to-r from-cyan-400 via-blue-500 to-amber-400 h-full rounded-full transition-all duration-300" style="width: ${progressPct}%"></div>
+                        </div>
+                        <div class="flex items-center justify-between text-[10px] text-slate-300 pt-1 border-t border-white/10">
+                            <span class="text-cyan-200 font-gowun truncate max-w-[65%]">💡 <b>${qItem.scholar}</b>: "${qItem.quote}"</span>
+                            <span class="text-amber-300 font-bold shrink-0">#${t.dDayText} #상담천개의문</span>
+                        </div>
                     </div>
-                    <div class="flex items-baseline justify-between py-0.5">
-                        <span class="font-display font-black text-2xl text-white tracking-tight leading-none">${t.hours}:${t.minutes}:${t.seconds}</span>
-                        <span class="text-[11px] font-bold text-amber-300">🎯 목표 달성: ${progressPct}% (${studyTimeText}/${targetHours}시간)</span>
-                    </div>
-                    <!-- 2. Goal Progress Bar (목표 달성률 시각화 프로그레스 바) -->
-                    <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden border border-white/10">
-                        <div class="bg-gradient-to-r from-cyan-400 via-blue-500 to-amber-400 h-full rounded-full transition-all duration-300" style="width: ${progressPct}%"></div>
-                    </div>
-                    <!-- 3 & 4. Group Auth Hashtags & Counselor Quote -->
-                    <div class="flex items-center justify-between text-[10px] text-slate-300 pt-1 border-t border-white/10">
-                        <span class="text-cyan-200 font-gowun truncate max-w-[65%]">💡 <b>${qItem.scholar}</b>: "${qItem.quote}"</span>
-                        <span class="text-amber-300 font-bold shrink-0">#${t.dDayText} #상담천개의문</span>
-                    </div>
-                </div>
-            `;
+                `;
+            } else {
+                liveClock.textContent = `${t.hours}:${t.minutes}:${t.seconds}`;
+                if (liveProgressText) liveProgressText.textContent = `🎯 목표 달성: ${progressPct}% (${studyTimeText}/${targetHours}시간)`;
+                if (liveProgressBar) liveProgressBar.style.width = `${progressPct}%`;
+            }
         }
 
         function drawCanvasStamp(ctx, width, height) {
@@ -761,6 +770,5 @@
         initCamera().catch(() => {});
     })();
     </script>
-    <script src="app.js?v=20260811_APP_JS_TOTALLY_CLEANED_LOCATION_NONE"></script>
 </body>
 </html>
