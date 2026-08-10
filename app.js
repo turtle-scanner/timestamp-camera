@@ -272,6 +272,8 @@ document.addEventListener('DOMContentLoaded', () => {
         ];
 
         let success = false;
+        const camStartOverlay = document.getElementById('camStartOverlay');
+
         for (const constraint of options) {
             try {
                 currentStream = await navigator.mediaDevices.getUserMedia(constraint);
@@ -284,6 +286,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 video.classList.remove('hidden');
                 if (liveViewportCanvas) liveViewportCanvas.style.display = 'none';
                 if (iosCamBanner) iosCamBanner.style.display = 'none';
+                if (camStartOverlay) camStartOverlay.style.display = 'none';
                 success = true;
                 break;
             } catch (err) {
@@ -295,6 +298,21 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('All live camera attempts failed. Showing iOS Native Camera Banner.');
             if (iosCamBanner) iosCamBanner.style.display = 'flex';
         }
+    }
+
+    const camStartOverlay = document.getElementById('camStartOverlay');
+    if (camStartOverlay) {
+        const startCamHandler = async () => {
+            await initCamera();
+            if (currentStream && camStartOverlay) {
+                camStartOverlay.style.display = 'none';
+            } else {
+                const cameraInput = document.getElementById('cameraInput');
+                if (cameraInput) cameraInput.click();
+            }
+        };
+        camStartOverlay.addEventListener('click', startCamHandler);
+        camStartOverlay.addEventListener('touchstart', startCamHandler, { passive: true });
     }
 
     const btnIosCamEnable = document.getElementById('btnIosCamEnable');
