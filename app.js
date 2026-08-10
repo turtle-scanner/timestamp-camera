@@ -420,70 +420,31 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(updateHeaderDDay, 1000);
     updateHeaderDDay();
 
-    // Render Watermark Overlay on Screen
+    // Render Watermark Overlay on Screen (Crystal Clear High-Contrast Card)
     function renderLiveStamp() {
         const t = getFormattedTime();
         const studyTimeText = formatTime(timerSeconds);
-        const qItem = counselorQuotes[currentQuoteIndex];
-        let html = '';
+        const qItem = counselorQuotes[currentQuoteIndex] || { scholar: "칼 로저스", quote: "나 스스로 성장의 힘을 가지고 있다." };
 
-        if (currentTheme === 'dday_study') {
-            html = `
-                <div class="stamp-dday_study flex flex-col gap-1">
-                    <div class="flex items-center justify-between">
-                        <span class="text-amber-400 font-black text-xs tracking-wider">🏆 2027 전문상담 수석합격 ${t.dDayText}</span>
-                        <span class="text-xs font-bold text-cyan-300">⏱️ 순공: ${studyTimeText}</span>
-                    </div>
-                    <div class="flex items-baseline justify-between py-0.5 border-t border-white/10">
-                        <span class="font-display font-black text-2xl text-white tracking-tight">${t.hours}:${t.minutes}:${t.seconds}</span>
-                        <span class="text-xs font-semibold text-slate-300">${t.year}.${t.month}.${t.date} (${t.day})</span>
-                    </div>
-                    <div class="text-[10px] text-amber-300 font-medium truncate pt-0.5 border-t border-white/10">
-                        💡 <b>${qItem.scholar}</b>: "${qItem.quote}"
-                    </div>
+        const html = `
+            <div class="bg-slate-900/90 backdrop-blur-md p-3.5 rounded-2xl border border-cyan-500/30 shadow-2xl flex flex-col gap-1.5 text-left">
+                <div class="flex items-center justify-between">
+                    <span class="text-amber-400 font-black text-xs tracking-wider">🏆 2027 전문상담 1차 ${t.dDayText}</span>
+                    <span class="text-xs font-bold text-cyan-300">⏱️ 순공: ${studyTimeText}</span>
                 </div>
-            `;
-        } else if (currentTheme === 'badge') {
-            html = `
-                <div class="stamp-badge flex flex-col gap-1">
-                    <div class="flex items-center justify-between">
-                        <span class="font-black text-xs">🔥 카톡 공부방 수석 인증 뱃지</span>
-                        <span class="font-black text-xs bg-black/20 px-2 py-0.5 rounded-full">${t.dDayText}</span>
-                    </div>
-                    <div class="font-display font-black text-3xl leading-none my-0.5">${t.hours}:${t.minutes}:${t.seconds}</div>
-                    <div class="text-[10px] text-amber-200 font-medium truncate">
-                        💡 <b>${qItem.scholar}</b>: "${qItem.quote}"
-                    </div>
+                <div class="flex items-baseline justify-between py-1 border-y border-white/10">
+                    <span class="font-display font-black text-2xl text-white tracking-tight leading-none">${t.hours}:${t.minutes}:${t.seconds}</span>
+                    <span class="text-xs font-bold text-amber-300">${t.year}.${t.month}.${t.date} (${t.day})</span>
                 </div>
-            `;
-        } else if (currentTheme === 'minimal') {
-            html = `
-                <div class="stamp-minimal flex flex-col gap-1">
-                    <div class="flex items-baseline justify-between">
-                        <span class="font-display font-black text-2xl text-cyan-300 tracking-tight">${t.hours}:${t.minutes}:${t.seconds}</span>
-                        <span class="text-xs font-semibold text-slate-300">${t.year}.${t.month}.${t.date} (${t.day})</span>
-                    </div>
-                    <div class="flex items-center justify-between text-[11px] text-slate-400 pt-0.5 border-t border-white/10">
-                        <span>📍 ${userLocation}</span>
-                        <span class="text-cyan-400 font-bold">⏱️ ${studyTimeText}</span>
-                    </div>
-                    <div class="text-[10px] text-amber-300 font-medium truncate pt-0.5 border-t border-white/10">
-                        💡 <b>${qItem.scholar}</b>: "${qItem.quote}"
-                    </div>
+                <div class="flex items-center justify-between text-[11px] text-slate-300 font-medium">
+                    <span>📍 ${userLocation}</span>
+                    <span class="text-cyan-300 font-bold">👤 ${userNickname}</span>
                 </div>
-            `;
-        } else if (currentTheme === 'grass') {
-            html = `
-                <div class="stamp-grass flex flex-col gap-1">
-                    <div class="flex items-center justify-between text-xs font-bold">
-                        <span>🌿 월간 열공 출석 인증 완료</span>
-                        <span class="text-emerald-300">${t.dDayText}</span>
-                    </div>
-                    <div class="font-display font-black text-2xl text-white">${t.hours}:${t.minutes}:${t.seconds}</div>
-                    <div class="text-[10px] text-emerald-200 truncate">💡 <b>${qItem.scholar}</b>: "${qItem.quote}"</div>
+                <div class="text-[11px] text-cyan-200 font-gowun pt-1 border-t border-white/10 leading-snug">
+                    💡 <b>${qItem.scholar}</b>: "${qItem.quote}"
                 </div>
-            `;
-        }
+            </div>
+        `;
 
         stampOverlay.innerHTML = html;
     }
@@ -929,129 +890,6 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.font = `600 ${Math.max(11, Math.floor(width * 0.024))}px "Noto Sans KR", sans-serif`;
             ctx.fillText(`📍 ${userLocation} | ⏱️ 순공: ${studyTimeText}`, marginX, height * 0.965);
 
-            ctx.restore();
-        } catch (e) {
-            console.error('Error drawing canvas stamp:', e);
-        }
-    }
-                    ctx.roundRect(stampX, stampY, width * 0.015, stampHeight, width * 0.015);
-                } catch (e) {
-                    ctx.rect(stampX, stampY, width * 0.015, stampHeight);
-                }
-            } else {
-                ctx.rect(stampX, stampY, width * 0.015, stampHeight);
-            }
-            ctx.fill();
-
-            // Text Drop Shadow
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.95)';
-            ctx.shadowBlur = 10;
-            ctx.shadowOffsetX = 1;
-            ctx.shadowOffsetY = 1;
-
-            // Row 1 (Y: 20%): D-Day & Stopwatch
-            ctx.fillStyle = '#fbbf24';
-            ctx.font = `800 ${width * 0.034}px sans-serif`;
-            ctx.fillText(`🏆 2027 전문상담 ${t.dDayText}`, stampX + (stampWidth * 0.05), stampY + (stampHeight * 0.20));
-
-            ctx.fillStyle = '#38bdf8';
-            ctx.font = `800 ${width * 0.032}px sans-serif`;
-            ctx.textAlign = 'right';
-            ctx.fillText(`⏱️ 순공: ${studyTimeText}`, stampX + (stampWidth * 0.95), stampY + (stampHeight * 0.20));
-            ctx.textAlign = 'left';
-
-            // Row 2 (Y: 45%): Large Time & Date (Dedicated Row - NO OVERLAPPING!)
-            ctx.fillStyle = '#ffffff';
-            ctx.font = `900 ${width * 0.052}px sans-serif`;
-            ctx.fillText(`${t.hours}:${t.minutes}:${t.seconds}`, stampX + (stampWidth * 0.05), stampY + (stampHeight * 0.45));
-
-            ctx.fillStyle = '#fde047';
-            ctx.font = `800 ${width * 0.034}px sans-serif`;
-            ctx.fillText(` (${t.year}.${t.month}.${t.date} ${t.day})`, stampX + (stampWidth * 0.05) + (width * 0.23), stampY + (stampHeight * 0.45));
-
-            // Row 3 (Y: 68%): Custom Motivation Note (Dedicated Row!)
-            ctx.fillStyle = '#38bdf8';
-            ctx.font = `800 ${width * 0.032}px sans-serif`;
-            ctx.fillText(`✨ ${userCustomNote}`, stampX + (stampWidth * 0.05), stampY + (stampHeight * 0.68));
-
-            // Row 4 (Y: 88%): Start/End Time Range & Credit
-            let timeRangeText = '';
-            if (studyStartTime && studyEndTime) {
-                timeRangeText = `📖 착석 ${studyStartTime} ~ 🏆 퇴실 ${studyEndTime}`;
-            } else if (studyStartTime) {
-                timeRangeText = `📖 착석 ${studyStartTime} (열공 중🔥)`;
-            } else {
-                timeRangeText = `📖 착석 준비 중`;
-            }
-
-            ctx.fillStyle = '#a7f3d0';
-            ctx.font = `800 ${width * 0.030}px sans-serif`;
-            ctx.fillText(`${timeRangeText}`, stampX + (stampWidth * 0.05), stampY + (stampHeight * 0.88));
-
-            ctx.fillStyle = '#cbd5e1';
-            ctx.font = `400 ${width * 0.020}px sans-serif`;
-            ctx.textAlign = 'right';
-            ctx.fillText(`만든이: 상담 천개의 문`, stampX + (stampWidth * 0.95), stampY + (stampHeight * 0.88));
-            ctx.textAlign = 'left';
-
-            // Reset Shadow Effect
-            ctx.shadowColor = 'transparent';
-            ctx.shadowBlur = 0;
-            ctx.shadowOffsetX = 0;
-            ctx.shadowOffsetY = 0;
-
-            // Reset Shadow Effect
-            ctx.shadowColor = 'transparent';
-            ctx.shadowBlur = 0;
-            ctx.shadowOffsetX = 0;
-            ctx.shadowOffsetY = 0;
-
-            // Reset Shadow Effect
-            ctx.shadowColor = 'transparent';
-            ctx.shadowBlur = 0;
-            ctx.shadowOffsetX = 0;
-            ctx.shadowOffsetY = 0;
-
-        } else if (currentTheme === 'badge') {
-            const grad = ctx.createLinearGradient(padding, boxY, width - padding, boxY + boxHeight);
-            grad.addColorStop(0, 'rgba(245, 158, 11, 0.95)');
-            grad.addColorStop(1, 'rgba(234, 88, 12, 0.95)');
-            ctx.fillStyle = grad;
-            ctx.beginPath();
-            ctx.roundRect(padding, boxY, width - (padding * 2), boxHeight, width * 0.025);
-            ctx.fill();
-
-            ctx.fillStyle = '#ffffff';
-            ctx.font = `900 ${width * 0.032}px 'Noto Sans KR', sans-serif`;
-            ctx.fillText(`🔥 카톡 수석 인증 뱃지  |  ${t.dDayText}`, padding * 1.5, boxY + (boxHeight * 0.3));
-
-            ctx.font = `900 ${width * 0.07}px Outfit, sans-serif`;
-            ctx.fillText(`${t.hours}:${t.minutes}:${t.seconds}`, padding * 1.5, boxY + (boxHeight * 0.85));
-
-            ctx.font = `700 ${width * 0.028}px 'Noto Sans KR', sans-serif`;
-            ctx.textAlign = 'right';
-            ctx.fillText(`⏱️ 순공: ${studyTimeText} | 👤 ${userNickname}`, width - (padding * 1.5), boxY + (boxHeight * 0.85));
-            ctx.textAlign = 'left';
-        } else if (currentTheme === 'grass') {
-            ctx.fillStyle = 'rgba(6, 78, 59, 0.9)';
-            ctx.beginPath();
-            ctx.roundRect(padding, boxY, width - (padding * 2), boxHeight, width * 0.025);
-            ctx.fill();
-
-            ctx.fillStyle = '#34d399';
-            ctx.font = `800 ${width * 0.03}px 'Noto Sans KR', sans-serif`;
-            ctx.fillText(`🌿 월간 열공 출석 인증 완료 (${t.dDayText})`, padding * 1.5, boxY + (boxHeight * 0.35));
-
-            ctx.fillStyle = '#ffffff';
-            ctx.font = `900 ${width * 0.065}px Outfit, sans-serif`;
-            ctx.fillText(`${t.hours}:${t.minutes}:${t.seconds}`, padding * 1.5, boxY + (boxHeight * 0.85));
-
-            ctx.fillStyle = '#a7f3d0';
-            ctx.font = `600 ${width * 0.028}px 'Noto Sans KR', sans-serif`;
-            ctx.textAlign = 'right';
-            ctx.fillText(`⏱️ 순공: ${studyTimeText} | 📍 ${userLocation}`, width - (padding * 1.5), boxY + (boxHeight * 0.85));
-            ctx.textAlign = 'left';
-        }
     }
 
     // Modal Control

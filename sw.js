@@ -1,4 +1,4 @@
-const CACHE_NAME = 'timestamp-camera-v20260811-draw-fix';
+const CACHE_NAME = 'timestamp-camera-v20260811-stamp-bug-fixed-final';
 const urlsToCache = [
   './',
   './index.html',
