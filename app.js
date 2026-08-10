@@ -687,7 +687,7 @@ document.addEventListener('DOMContentLoaded', () => {
         nextQuote();
         renderLiveStamp();
 
-        // iOS Fallback: If live WebRTC camera is blocked/inactive on iPhone Safari, trigger native camera
+        // Mobile Fallback: If live video stream is not active, immediately open native camera
         if (!currentStream || !video || video.videoWidth === 0) {
             const cameraInput = document.getElementById('cameraInput');
             if (cameraInput) {

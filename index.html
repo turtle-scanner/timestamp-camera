@@ -140,7 +140,7 @@
         <canvas id="snapshotCanvas" class="hidden"></canvas>
 
         <!-- Smartphone Watermark Overlay Placeholder (High-Contrast Floating Card) -->
-        <div id="stampOverlay" class="absolute bottom-16 left-4 right-4 pointer-events-none z-40 transition-all duration-300">
+        <div id="stampOverlay" class="absolute bottom-28 left-4 right-4 pointer-events-none z-40 transition-all duration-300">
             <!-- Dynamic Stamp Rendered via JS -->
         </div>
 
@@ -152,8 +152,8 @@
             </button>
         </div>
 
-        <!-- Right Bottom Floating Thumb Button (Super Easy Right-Hand Access) -->
-        <button id="btnStartTimer" class="fixed bottom-20 right-4 z-[9999] px-5 py-4 rounded-full font-black text-sm bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-2xl shadow-cyan-500/50 border-2 border-cyan-300 active:scale-90 transition duration-150 flex items-center justify-center gap-2 tracking-tight cursor-pointer" title="공부 시작 & 캡처">
+        <!-- Right Bottom Floating Thumb Button (Raised Upwards to Prevent Mobile Navigation Bar Clipping) -->
+        <button id="btnStartTimer" class="fixed bottom-28 right-4 z-[9999] px-6 py-4 rounded-full font-black text-sm bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-2xl shadow-cyan-500/50 border-2 border-cyan-300 active:scale-90 transition duration-150 flex items-center justify-center gap-2 tracking-tight cursor-pointer" title="공부 시작 & 캡처">
             <span>▶ 시작 & 📸 촬영</span>
         </button>
 
@@ -162,8 +162,8 @@
         <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden">
     </main>
 
-    <!-- Bottom Controls & Theme Picker -->
-    <footer class="relative z-30 bg-slate-950 border-t border-white/10 px-4 pt-3 pb-6 flex flex-col gap-3">
+    <!-- Bottom Controls & Theme Picker (Raised Upwards for Mobile Nav Bars) -->
+    <footer class="relative z-30 bg-slate-950 border-t border-white/10 px-4 pt-3 pb-12 flex flex-col gap-3">
         
         <!-- Theme Selection Pill Tabs -->
         <div class="flex items-center justify-center gap-2 overflow-x-auto no-scrollbar py-0.5">
@@ -276,6 +276,6 @@
         <button id="btnCloseHelp" class="text-slate-400 hover:text-white px-2 py-1 text-sm">✕</button>
     </div>
 
-    <script src="app.js?v=20260811_DIRECT_CAM_START_NOW"></script>
+    <script src="app.js?v=20260811_LAYOUT_RAISED_CAM_FIXED_FINAL"></script>
 </body>
 </html>
