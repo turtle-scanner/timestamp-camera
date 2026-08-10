@@ -301,9 +301,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnIosCamEnable) {
         btnIosCamEnable.addEventListener('click', async () => {
             await initCamera();
-            if (!currentStream) {
-                const cameraInput = document.getElementById('cameraInput');
-                if (cameraInput) cameraInput.click();
+            const cameraInput = document.getElementById('cameraInput');
+            if (!currentStream && cameraInput) {
+                cameraInput.click();
             }
         });
     }
