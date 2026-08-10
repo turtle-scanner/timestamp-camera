@@ -1,4 +1,4 @@
-const CACHE_NAME = 'timestamp-camera-v20260811-add-mood-options-not-focused-identity-diffusion';
+const CACHE_NAME = 'timestamp-camera-v20260811-mood-condition-tag-prints-on-canvas-photo';
 
 self.addEventListener('install', event => {
   self.skipWaiting();

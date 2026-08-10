@@ -789,10 +789,10 @@
 
                 const marginX = width * 0.04;
 
-                // 1. Top Line: D-Day + Stamp Mode + Streak + Subject Tag + Mood Tag
+                // 1. Top Line: D-Day + Stamp Mode + Mood Tag + Streak + Subject Tag
                 ctx.fillStyle = theme.hexMain;
                 ctx.font = `800 ${Math.max(16, Math.floor(width * 0.038))}px "Noto Sans KR", sans-serif`;
-                ctx.fillText(`🏆 2027 전문상담 1차 ${t.dDayText}  [${modeBadgeText}]  🔥${streakCnt}일연속  ${subjectTag}`, marginX, height * 0.048);
+                ctx.fillText(`🏆 2027 전문상담 1차 ${t.dDayText}  [${modeBadgeText}]  ${moodTag}  🔥${streakCnt}일연속  ${subjectTag}`, marginX, height * 0.048);
 
                 // 2. Top Subline: Counselor Quote & Exam Vaccine Tip
                 ctx.fillStyle = theme.hexSub;
