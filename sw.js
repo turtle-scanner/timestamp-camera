@@ -1,4 +1,4 @@
-const CACHE_NAME = 'timestamp-camera-v20260811-add-3-counseling-study-types';
+const CACHE_NAME = 'timestamp-camera-v20260811-youth-counselor-quiz-popup-modal-loaded';
 
 self.addEventListener('install', event => {
   self.skipWaiting();

@@ -174,7 +174,7 @@
             <!-- 1. Subject & Study Type Dropdown -->
             <div class="flex items-center gap-1 shrink-0">
                 <span class="text-[11px] font-bold text-cyan-300">📚 과목/유형:</span>
-                <select id="selectSubject" onchange="renderLiveStamp()" class="bg-slate-900 border border-cyan-500/40 rounded-lg px-2 py-1 text-[11px] font-semibold text-white focus:outline-none focus:border-cyan-400">
+                <select id="selectSubject" onchange="handleSubjectChange()" class="bg-slate-900 border border-cyan-500/40 rounded-lg px-2 py-1 text-[11px] font-semibold text-white focus:outline-none focus:border-cyan-400">
                     <option value="[상담 - 요약 외우기]">📝 상담 - 요약 외우기</option>
                     <option value="[상담 - 키워드 암기]">🔑 상담 - 키워드 암기</option>
                     <option value="[상담 - 문제풀기]">🎯 상담 - 문제풀기</option>
@@ -257,6 +257,39 @@
             <button onclick="document.getElementById('btnCloseModal').click()" class="w-full py-3 rounded-xl bg-slate-900 border border-cyan-500/40 text-cyan-300 font-bold text-xs shadow-lg active:scale-95 transition flex items-center justify-center gap-2">
                 <span>✕ 터치하여 카메라 촬영 모드로 돌아가기 (2초 후 자동 복귀)</span>
             </button>
+        </div>
+    </div>
+
+    <!-- Youth Counselor Multiple Choice Quiz Modal -->
+    <div id="quizModal" class="fixed inset-0 z-[105] bg-black/90 backdrop-blur-md flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-cyan-500/40 rounded-2xl p-5 w-full max-w-md flex flex-col gap-3.5 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-white/10 pb-2.5">
+                <div class="flex items-center gap-2">
+                    <span class="text-lg">🎯</span>
+                    <h3 class="text-sm font-bold text-cyan-300">청소년상담사 올해 예상 객관식 퀴즈</h3>
+                </div>
+                <button onclick="closeQuizModal()" class="text-slate-400 hover:text-white text-lg font-bold">✕</button>
+            </div>
+
+            <!-- Quiz Card Content -->
+            <div id="quizCardBox" class="flex flex-col gap-3">
+                <div id="quizQuestionText" class="text-xs font-bold text-slate-100 leading-relaxed bg-slate-950 p-3 rounded-xl border border-white/10">
+                    <!-- Dynamic Question Text -->
+                </div>
+                <div id="quizOptionsBox" class="flex flex-col gap-2">
+                    <!-- Dynamic Option Buttons -->
+                </div>
+                <div id="quizExplanationBox" class="text-[11px] font-semibold text-emerald-300 bg-emerald-950/40 p-2.5 rounded-xl border border-emerald-500/30 hidden">
+                    <!-- Explanation -->
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between pt-2 border-t border-white/10">
+                <span id="quizProgressText" class="text-[11px] font-bold text-amber-300">문제 1 / 2</span>
+                <button id="btnNextQuiz" onclick="loadNextQuizQuestion()" class="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg active:scale-95 transition hidden">
+                    다음 문제 풀기 ➔
+                </button>
+            </div>
         </div>
     </div>
 
@@ -589,6 +622,158 @@
                 ctx.restore();
             } catch (e) {}
         }
+
+        // Youth Counselor & Professional Counseling Exam Multiple Choice Quiz Bank (6 Key Questions)
+        const youthQuizBank = [
+            {
+                q: "Q1. 엘리스(Ellis)의 REBT에서 내담자의 비합리적 신념을 객관적으로 검증할 때, 신념의 실용적·효율적 유용성을 따져보는 논박 기법은?",
+                options: ["① 탐구적 논박", "② 철학적 논박", "③ 실용적(실질적) 논박", "④ 경험적 논박", "⑤ 서술적 논박"],
+                answer: 2,
+                exp: "정답: ③ 실용적(실질적) 논박. '그 신념을 유지하는 것이 자신에게 실질적인 도움이 되는가?'를 평가하는 논박입니다."
+            },
+            {
+                q: "Q2. DSM-5-TR 진단 기준 중 주 양육자의 극심한 양육 결핍을 경험하였으나, 반응성 애착장애(RAD)와 달리 낯선 성인에 대해 주저함이 전혀 없고 무분별한 친밀감을 보이는 장애는?",
+                options: ["① 반응성 애착장애", "② 탈억제성 사회관여 장애 (DSED)", "③ 적대적 반항장애", "④ 분리불안 장애", "⑤ 품행장애"],
+                answer: 1,
+                exp: "정답: ② 탈억제성 사회관여 장애 (DSED). 낯선 성인에 대한 과도한 친밀감과 주저함의 결여가 핵심 진단 단서입니다."
+            },
+            {
+                q: "Q3. 보웬(Bowen)의 다세대 가족치료에서 사고와 감정을 분리하여 타인의 감정에 휩싸이지 않고 자율성을 유지하는 핵심 개념은?",
+                options: ["① 삼각관계", "② 자아통합", "③ 탈삼각화", "④ 자기분화", "⑤ 투사과정"],
+                answer: 3,
+                exp: "정답: ④ 자기분화 (사고와 감정의 분리). 감정적 반응성과 사고 기능을 분리할 수 있는 능력을 말합니다."
+            },
+            {
+                q: "Q4. 아들러(Adler)의 개별심리학에서 인간 행동의 근진적 동기로서 열등감을 보상하고 삶의 가능성을 완성해 나가는 동인 개념은?",
+                options: ["① 우월성 추구", "② 창조적 자기", "③ 생활양식", "④ 사회적 관심", "⑤ 가상적 최종목표"],
+                answer: 0,
+                exp: "정답: ① 우월성 추구. 모든 인간이 열등감을 극복하고 완성을 향해 나아가는 선천적 동기입니다."
+            },
+            {
+                q: "Q5. 미누친(Minuchin)의 구조적 가족치료에서 가족 구성원 간의 자율성을 존중하면서도 상호 의사소통이 원활히 이루어지는 경계선 상태는?",
+                options: ["① 밀착된 경계선", "② 경직된 경계선", "③ 명확한 경계선", "④ 분리된 경계선", "⑤ 침범된 경계선"],
+                answer: 2,
+                exp: "정답: ③ 명확한 경계선. 자율성과 연대감이 균형을 이루는 건강한 경계선입니다."
+            },
+            {
+                q: "Q6. 로저스(Rogers)의 인간중심 상담에서 상담자가 내담자의 경험을 자신의 시각이 아닌 내담자의 내부 참조틀을 통해 느끼는 태도는?",
+                options: ["① 무조건적 정적 관심", "② 진실성", "③ 공감적 이해", "④ 지금-여기", "⑤ 현상학적 장"],
+                answer: 2,
+                exp: "정답: ③ 공감적 이해. 내담자의 감정과 사적 의미를 마치 자신의 것처럼 느끼는 3대 핵심 태도입니다."
+            }
+        ];
+
+        let selectedQuizSet = [];
+        let currentQuizIdx = 0;
+
+        window.openQuizModal = function() {
+            const shuffled = [...youthQuizBank].sort(() => 0.5 - Math.random());
+            selectedQuizSet = shuffled.slice(0, 2);
+            currentQuizIdx = 0;
+            
+            const quizModal = document.getElementById('quizModal');
+            if (quizModal) {
+                quizModal.classList.remove('hidden');
+                renderQuizQuestion();
+            }
+        };
+
+        window.closeQuizModal = function() {
+            const quizModal = document.getElementById('quizModal');
+            if (quizModal) quizModal.classList.add('hidden');
+        };
+
+        function renderQuizQuestion() {
+            if (currentQuizIdx >= selectedQuizSet.length) {
+                const quizCardBox = document.getElementById('quizCardBox');
+                if (quizCardBox) {
+                    quizCardBox.innerHTML = `
+                        <div class="text-center py-4 flex flex-col gap-2">
+                            <span class="text-3xl">🎉</span>
+                            <h4 class="font-bold text-sm text-cyan-300">청소년상담사 객관식 2문항 풀이 완료!</h4>
+                            <p class="text-xs text-slate-300">스탬프 과목태그가 <b class="text-amber-300">[상담 - 문제풀기]</b> 로 설정되었습니다.</p>
+                            <button onclick="closeQuizModal()" class="mt-2 py-2 px-4 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs">확인 (닫기)</button>
+                        </div>
+                    `;
+                }
+                const btnNextQuiz = document.getElementById('btnNextQuiz');
+                if (btnNextQuiz) btnNextQuiz.style.display = 'none';
+                const quizProgressText = document.getElementById('quizProgressText');
+                if (quizProgressText) quizProgressText.textContent = '풀이 완료! 💯';
+
+                const selectSubject = document.getElementById('selectSubject');
+                if (selectSubject) {
+                    selectSubject.value = '[상담 - 문제풀기]';
+                    renderLiveStamp();
+                }
+                return;
+            }
+
+            const item = selectedQuizSet[currentQuizIdx];
+            const quizProgressText = document.getElementById('quizProgressText');
+            if (quizProgressText) quizProgressText.textContent = `문제 ${currentQuizIdx + 1} / 2`;
+            
+            const quizQuestionText = document.getElementById('quizQuestionText');
+            if (quizQuestionText) quizQuestionText.textContent = item.q;
+
+            const optionsBox = document.getElementById('quizOptionsBox');
+            if (optionsBox) {
+                optionsBox.innerHTML = '';
+                item.options.forEach((optText, optIdx) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'w-full text-left px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-white/10 text-xs font-semibold text-slate-200 transition active:scale-95';
+                    btn.textContent = optText;
+                    btn.onclick = () => checkQuizAnswer(optIdx, item.answer, item.exp, btn);
+                    optionsBox.appendChild(btn);
+                });
+            }
+
+            const expBox = document.getElementById('quizExplanationBox');
+            if (expBox) expBox.classList.add('hidden');
+            
+            const btnNextQuiz = document.getElementById('btnNextQuiz');
+            if (btnNextQuiz) btnNextQuiz.style.display = 'none';
+        }
+
+        function checkQuizAnswer(chosenIdx, correctIdx, expText, clickedBtn) {
+            const optionsBox = document.getElementById('quizOptionsBox');
+            const allBtns = optionsBox.querySelectorAll('button');
+            allBtns.forEach(b => b.disabled = true);
+
+            const expBox = document.getElementById('quizExplanationBox');
+
+            if (chosenIdx === correctIdx) {
+                clickedBtn.className = 'w-full text-left px-3 py-2.5 rounded-xl bg-emerald-600 border border-emerald-400 text-xs font-bold text-white shadow-lg';
+                clickedBtn.innerHTML += ' ⭕ <b>정답!</b>';
+                if (expBox) expBox.innerHTML = `⭕ <b>정답입니다!</b><br>${expText}`;
+            } else {
+                clickedBtn.className = 'w-full text-left px-3 py-2.5 rounded-xl bg-rose-600 border border-rose-400 text-xs font-bold text-white shadow-lg';
+                clickedBtn.innerHTML += ' ❌ <b>오답</b>';
+                
+                if (allBtns[correctIdx]) {
+                    allBtns[correctIdx].className = 'w-full text-left px-3 py-2.5 rounded-xl bg-emerald-700/80 border border-emerald-400 text-xs font-bold text-white';
+                    allBtns[correctIdx].innerHTML += ' 👈 <b>(정답)</b>';
+                }
+                if (expBox) expBox.innerHTML = `❌ <b>아쉽네요!</b><br>${expText}`;
+            }
+
+            if (expBox) expBox.classList.remove('hidden');
+            const btnNextQuiz = document.getElementById('btnNextQuiz');
+            if (btnNextQuiz) btnNextQuiz.style.display = 'block';
+        }
+
+        window.loadNextQuizQuestion = function() {
+            currentQuizIdx++;
+            renderQuizQuestion();
+        };
+
+        window.handleSubjectChange = function() {
+            const selectSubject = document.getElementById('selectSubject');
+            if (selectSubject && selectSubject.value === '[상담 - 문제풀기]') {
+                openQuizModal();
+            }
+            renderLiveStamp();
+        };
 
         async function initCamera() {
             const video = document.getElementById('videoElement');
