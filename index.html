@@ -162,22 +162,60 @@
         <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden">
     </main>
 
-    <!-- Bottom Controls & Theme Picker (Raised Upwards for Mobile Nav Bars) -->
-    <footer class="relative z-30 bg-slate-950 border-t border-white/10 px-4 pt-3 pb-12 flex flex-col gap-3">
+    <!-- Bottom Controls & Upgrade Options (Raised Upwards for Mobile Nav Bars) -->
+    <footer class="relative z-30 bg-slate-950 border-t border-white/10 px-4 pt-3 pb-10 flex flex-col gap-2.5">
         
+        <!-- 4 Upgrade Feature Controls (Subject, Target Goal, Mood, Hashtags) -->
+        <div class="flex items-center justify-between gap-2 overflow-x-auto no-scrollbar py-1 border-b border-white/10">
+            <!-- 1. Subject Tag Dropdown -->
+            <div class="flex items-center gap-1 shrink-0">
+                <span class="text-[11px] font-bold text-cyan-300">📚 과목:</span>
+                <select id="selectSubject" onchange="renderLiveStamp()" class="bg-slate-900 border border-cyan-500/40 rounded-lg px-2 py-1 text-[11px] font-semibold text-white focus:outline-none focus:border-cyan-400">
+                    <option value="[전공상담 - 이상심리학]">📘 이상심리학</option>
+                    <option value="[전공상담 - 심리검사]">📗 심리검사/사정</option>
+                    <option value="[전공상담 - 상담이론]">📕 상담이론/실제</option>
+                    <option value="[전공상담 - 진로상담]">📙 진로상담</option>
+                    <option value="[전공상담 - 가족치료]">💜 가족치료</option>
+                    <option value="[전공상담 - 집단상담]">💛 집단상담</option>
+                    <option value="[전공상담 - 학교상담]">🛡️ 학교상담/위기</option>
+                    <option value="[교육학 - 교육과정]">🎓 교육학 핵심</option>
+                </select>
+            </div>
+
+            <!-- 2. Target Goal Selector -->
+            <div class="flex items-center gap-1 shrink-0">
+                <span class="text-[11px] font-bold text-amber-300">🎯 목표:</span>
+                <select id="selectTargetGoal" onchange="renderLiveStamp()" class="bg-slate-900 border border-amber-500/40 rounded-lg px-2 py-1 text-[11px] font-semibold text-amber-200 focus:outline-none focus:border-amber-400">
+                    <option value="5">5시간</option>
+                    <option value="8">8시간</option>
+                    <option value="10">10시간</option>
+                    <option value="3">3시간</option>
+                </select>
+            </div>
+
+            <!-- 3. Mood/Condition Selector -->
+            <div class="flex items-center gap-1 shrink-0">
+                <span class="text-[11px] font-bold text-emerald-300">컨디션:</span>
+                <select id="selectMood" onchange="renderLiveStamp()" class="bg-slate-900 border border-emerald-500/40 rounded-lg px-2 py-1 text-[11px] font-semibold text-emerald-200 focus:outline-none focus:border-emerald-400">
+                    <option value="🔥 열공중">🔥 열공중</option>
+                    <option value="☕ 몰입중">☕ 몰입중</option>
+                    <option value="⚡ 집착열정">⚡ 집착열정</option>
+                    <option value="☀️ 쾌청맑음">☀️ 쾌청맑음</option>
+                    <option value="🍀 수석합격">🍀 수석합격</option>
+                </select>
+            </div>
+        </div>
+
         <!-- Theme Selection Pill Tabs -->
         <div class="flex items-center justify-center gap-2 overflow-x-auto no-scrollbar py-0.5">
             <button data-theme="minimal" class="theme-btn active px-3 py-1 rounded-full text-xs font-semibold border transition">
-                ✨ 미니멀 날짜+시간
+                ✨ 미니멀 스탬프
             </button>
             <button data-theme="dday_study" class="theme-btn px-3 py-1 rounded-full text-xs font-semibold border transition">
-                🏆 D-Day + 순공
+                🏆 D-Day + 과목태그
             </button>
             <button data-theme="badge" class="theme-btn px-3 py-1 rounded-full text-xs font-semibold border transition">
-                🔥 카톡 수석 뱃지
-            </button>
-            <button data-theme="grass" class="theme-btn px-3 py-1 rounded-full text-xs font-semibold border transition">
-                🌿 출석 잔디
+                🔥 스터디 해시태그
             </button>
         </div>
 
@@ -383,6 +421,18 @@
             const t = getFormattedTime();
             const qItem = counselorQuotes[currentQuoteIndex] || counselorQuotes[0];
 
+            const selectSubject = document.getElementById('selectSubject');
+            const selectTargetGoal = document.getElementById('selectTargetGoal');
+            const selectMood = document.getElementById('selectMood');
+
+            const subjectTag = selectSubject ? selectSubject.value : '[전공상담 - 이상심리학]';
+            const targetHours = selectTargetGoal ? parseInt(selectTargetGoal.value, 10) : 5;
+            const moodTag = selectMood ? selectMood.value : '🔥 열공중';
+
+            const targetSec = targetHours * 3600;
+            const progressPct = Math.min(100, Math.round((timerSeconds / targetSec) * 100));
+            const studyTimeText = formatTime(timerSeconds);
+
             if (headerDDay) {
                 headerDDay.textContent = `2027 전문상담 1차 ${t.dDayText}`;
             }
@@ -390,14 +440,27 @@
             if (!stampOverlay) return;
 
             stampOverlay.innerHTML = `
-                <div class="bg-slate-900/85 backdrop-blur-md px-4 py-3 rounded-2xl border border-cyan-500/30 shadow-2xl flex flex-col gap-1 text-left">
+                <div class="bg-slate-900/85 backdrop-blur-md px-4 py-3 rounded-2xl border border-cyan-500/30 shadow-2xl flex flex-col gap-1.5 text-left">
                     <div class="flex items-center justify-between">
-                        <span class="text-amber-400 font-black text-xs tracking-wider">🏆 2027 전문상담 1차 ${t.dDayText}</span>
-                        <span class="text-xs font-bold text-amber-300">${t.year}.${t.month}.${t.date} (${t.day})</span>
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <span class="text-amber-400 font-black text-xs tracking-wider">🏆 2027 전문상담 1차 ${t.dDayText}</span>
+                            <span class="bg-cyan-500/20 text-cyan-300 border border-cyan-400/40 text-[10px] font-bold px-1.5 py-0.5 rounded-md">${subjectTag}</span>
+                            <span class="bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 text-[10px] font-bold px-1.5 py-0.5 rounded-md">${moodTag}</span>
+                        </div>
+                        <span class="text-xs font-bold text-amber-300 shrink-0">${t.year}.${t.month}.${t.date} (${t.day})</span>
                     </div>
-                    <div class="font-display font-black text-2xl text-white tracking-tight leading-none my-0.5">${t.hours}:${t.minutes}:${t.seconds}</div>
-                    <div class="text-[11px] text-cyan-200 font-gowun pt-1 border-t border-white/10 truncate">
-                        💡 <b>${qItem.scholar}</b>: "${qItem.quote}"
+                    <div class="flex items-baseline justify-between py-0.5">
+                        <span class="font-display font-black text-2xl text-white tracking-tight leading-none">${t.hours}:${t.minutes}:${t.seconds}</span>
+                        <span class="text-[11px] font-bold text-amber-300">🎯 목표 달성: ${progressPct}% (${studyTimeText}/${targetHours}시간)</span>
+                    </div>
+                    <!-- 2. Goal Progress Bar (목표 달성률 시각화 프로그레스 바) -->
+                    <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden border border-white/10">
+                        <div class="bg-gradient-to-r from-cyan-400 via-blue-500 to-amber-400 h-full rounded-full transition-all duration-300" style="width: ${progressPct}%"></div>
+                    </div>
+                    <!-- 3 & 4. Group Auth Hashtags & Counselor Quote -->
+                    <div class="flex items-center justify-between text-[10px] text-slate-300 pt-1 border-t border-white/10">
+                        <span class="text-cyan-200 font-gowun truncate max-w-[65%]">💡 <b>${qItem.scholar}</b>: "${qItem.quote}"</span>
+                        <span class="text-amber-300 font-bold shrink-0">#${t.dDayText} #상담천개의문</span>
                     </div>
                 </div>
             `;
@@ -408,21 +471,33 @@
                 const t = getFormattedTime();
                 const qItem = counselorQuotes[currentQuoteIndex] || counselorQuotes[0];
 
+                const selectSubject = document.getElementById('selectSubject');
+                const selectTargetGoal = document.getElementById('selectTargetGoal');
+                const selectMood = document.getElementById('selectMood');
+
+                const subjectTag = selectSubject ? selectSubject.value : '[전공상담 - 이상심리학]';
+                const targetHours = selectTargetGoal ? parseInt(selectTargetGoal.value, 10) : 5;
+                const moodTag = selectMood ? selectMood.value : '🔥 열공중';
+
+                const targetSec = targetHours * 3600;
+                const progressPct = Math.min(100, Math.round((timerSeconds / targetSec) * 100));
+                const studyTimeText = formatTime(timerSeconds);
+
                 ctx.save();
 
                 // Top Subtle Dark Gradient
-                const topBarHeight = height * 0.12;
+                const topBarHeight = height * 0.14;
                 const topGrad = ctx.createLinearGradient(0, 0, 0, topBarHeight);
-                topGrad.addColorStop(0, 'rgba(15, 23, 42, 0.85)');
+                topGrad.addColorStop(0, 'rgba(15, 23, 42, 0.88)');
                 topGrad.addColorStop(1, 'rgba(15, 23, 42, 0.0)');
                 ctx.fillStyle = topGrad;
                 ctx.fillRect(0, 0, width, topBarHeight);
 
                 // Bottom Subtle Dark Gradient
-                const botBarHeight = height * 0.14;
+                const botBarHeight = height * 0.18;
                 const botGrad = ctx.createLinearGradient(0, height - botBarHeight, 0, height);
                 botGrad.addColorStop(0, 'rgba(15, 23, 42, 0.0)');
-                botGrad.addColorStop(1, 'rgba(15, 23, 42, 0.85)');
+                botGrad.addColorStop(1, 'rgba(15, 23, 42, 0.88)');
                 ctx.fillStyle = botGrad;
                 ctx.fillRect(0, height - botBarHeight, width, botBarHeight);
 
@@ -434,27 +509,55 @@
 
                 const marginX = width * 0.04;
 
-                // 1. Top Left: D-Day
+                // 1. Top Line: D-Day + Subject Tag + Mood Tag
                 ctx.fillStyle = '#fbbf24';
-                ctx.font = `800 ${Math.max(18, Math.floor(width * 0.040))}px "Noto Sans KR", sans-serif`;
-                ctx.fillText(`🏆 2027 전문상담 1차 ${t.dDayText}`, marginX, height * 0.048);
+                ctx.font = `800 ${Math.max(16, Math.floor(width * 0.038))}px "Noto Sans KR", sans-serif`;
+                ctx.fillText(`🏆 2027 전문상담 1차 ${t.dDayText}  ${subjectTag}  ${moodTag}`, marginX, height * 0.048);
 
-                // 2. Top Left Subline: Counselor Quote
+                // 2. Top Subline: Counselor Quote
                 ctx.fillStyle = '#67e8f9';
-                ctx.font = `700 ${Math.max(13, Math.floor(width * 0.027))}px "Noto Sans KR", sans-serif`;
+                ctx.font = `700 ${Math.max(12, Math.floor(width * 0.026))}px "Noto Sans KR", sans-serif`;
                 ctx.fillText(`💡 ${qItem.scholar}: "${qItem.quote}"`, marginX, height * 0.088);
 
-                // 3. Bottom Left: Time & Date (NO OTHER TEXT)
-                const timeY = height * 0.94;
-                const timeFontSize = Math.max(24, Math.floor(width * 0.065));
+                // 3. Bottom Line 1: Time & Date
+                const timeY = height * 0.89;
+                const timeFontSize = Math.max(22, Math.floor(width * 0.060));
                 ctx.fillStyle = '#ffffff';
                 ctx.font = `900 ${timeFontSize}px "Outfit", sans-serif`;
                 ctx.fillText(`${t.hours}:${t.minutes}:${t.seconds}`, marginX, timeY);
 
                 const dateX = marginX + (timeFontSize * 3.8);
                 ctx.fillStyle = '#fde047';
-                ctx.font = `800 ${Math.max(15, Math.floor(width * 0.038))}px "Noto Sans KR", sans-serif`;
+                ctx.font = `800 ${Math.max(14, Math.floor(width * 0.035))}px "Noto Sans KR", sans-serif`;
                 ctx.fillText(`(${t.year}.${t.month}.${t.date} ${t.day})`, dateX, timeY - (height * 0.004));
+
+                // 4. Bottom Line 2: Goal Progress Bar & Group Auth Hashtags
+                const barY = height * 0.93;
+                const barWidth = width * 0.92;
+                const barHeight = Math.max(6, Math.floor(height * 0.012));
+
+                // Progress Bar Background
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+                ctx.fillRect(marginX, barY, barWidth, barHeight);
+
+                // Progress Bar Active Fill
+                const activeWidth = (barWidth * progressPct) / 100;
+                const fillGrad = ctx.createLinearGradient(marginX, 0, marginX + barWidth, 0);
+                fillGrad.addColorStop(0, '#22d3ee');
+                fillGrad.addColorStop(0.5, '#3b82f6');
+                fillGrad.addColorStop(1, '#fbbf24');
+                ctx.fillStyle = fillGrad;
+                ctx.fillRect(marginX, barY, activeWidth, barHeight);
+
+                // Subline 3: Progress text + Hashtags
+                ctx.fillStyle = '#fde047';
+                ctx.font = `700 ${Math.max(11, Math.floor(width * 0.025))}px "Noto Sans KR", sans-serif`;
+                ctx.fillText(`🎯 달성률: ${progressPct}% (${studyTimeText}/${targetHours}h)`, marginX, height * 0.97);
+
+                const tagX = width * 0.58;
+                ctx.fillStyle = '#67e8f9';
+                ctx.font = `800 ${Math.max(11, Math.floor(width * 0.025))}px "Noto Sans KR", sans-serif`;
+                ctx.fillText(`#${t.dDayText} #상담천개의문 #합격인증`, tagX, height * 0.97);
 
                 ctx.restore();
             } catch (e) {}
@@ -654,6 +757,6 @@
         initCamera().catch(() => {});
     })();
     </script>
-    <script src="app.js?v=20260811_PURGE_LOCALSTORAGE_LOCATION_NOW"></script>
+    <script src="app.js?v=20260811_4_UPGRADE_FEATURES_INTEGRATED"></script>
 </body>
 </html>

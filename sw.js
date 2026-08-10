@@ -1,4 +1,4 @@
-const CACHE_NAME = 'timestamp-camera-v20260811-purge-localstorage-location';
+const CACHE_NAME = 'timestamp-camera-v20260811-4-upgrade-features-integrated';
 
 self.addEventListener('install', event => {
   self.skipWaiting();
