@@ -190,10 +190,13 @@
             <div class="flex items-center gap-1 shrink-0">
                 <span class="text-[11px] font-bold text-amber-300">🎯 목표:</span>
                 <select id="selectTargetGoal" onchange="renderLiveStamp()" class="bg-slate-900 border border-amber-500/40 rounded-lg px-2 py-1 text-[11px] font-semibold text-amber-200 focus:outline-none focus:border-amber-400">
-                    <option value="5">5시간</option>
-                    <option value="8">8시간</option>
-                    <option value="10">10시간</option>
-                    <option value="3">3시간</option>
+                    <option value="25m">⏱️ 25분 (뽀모도로)</option>
+                    <option value="50m">⏱️ 50분 (1교시)</option>
+                    <option value="1h">1시간</option>
+                    <option value="2h">2시간</option>
+                    <option value="3h">3시간</option>
+                    <option value="4h">4시간</option>
+                    <option value="5h">5시간</option>
                 </select>
             </div>
 
@@ -419,6 +422,16 @@
             if (timerDisplay) timerDisplay.textContent = formatTime(timerSeconds);
         }
 
+        function getTargetSecAndLabel(valStr) {
+            if (!valStr) return { targetSec: 3600, label: '1시간' };
+            if (valStr.endsWith('m')) {
+                const mins = parseInt(valStr.replace('m', ''), 10) || 25;
+                return { targetSec: mins * 60, label: `${mins}분` };
+            }
+            const hours = parseInt(valStr.replace('h', ''), 10) || 1;
+            return { targetSec: hours * 3600, label: `${hours}시간` };
+        }
+
         function renderLiveStamp() {
             const stampOverlay = document.getElementById('stampOverlay');
             const headerDDay = document.getElementById('headerDDay');
@@ -430,11 +443,10 @@
             const selectMood = document.getElementById('selectMood');
 
             const subjectTag = selectSubject ? selectSubject.value : '[전공상담 - 이상심리학]';
-            const targetHours = selectTargetGoal ? parseInt(selectTargetGoal.value, 10) : 5;
+            const goalInfo = getTargetSecAndLabel(selectTargetGoal ? selectTargetGoal.value : '25m');
             const moodTag = selectMood ? selectMood.value : '🔥 열공중';
 
-            const targetSec = targetHours * 3600;
-            const progressPct = Math.min(100, Math.round((timerSeconds / targetSec) * 100));
+            const progressPct = Math.min(100, Math.round((timerSeconds / goalInfo.targetSec) * 100));
             const studyTimeText = formatTime(timerSeconds);
 
             if (headerDDay) {
@@ -461,7 +473,7 @@
                         </div>
                         <div class="flex items-baseline justify-between py-0.5">
                             <span id="stampLiveClock" class="font-display font-black text-2xl text-white tracking-tight leading-none">${t.hours}:${t.minutes}:${t.seconds}</span>
-                            <span id="stampProgressText" class="text-[11px] font-bold text-amber-300">🎯 목표 달성: ${progressPct}% (${studyTimeText}/${targetHours}시간)</span>
+                            <span id="stampProgressText" class="text-[11px] font-bold text-amber-300">🎯 목표 달성: ${progressPct}% (${studyTimeText}/${goalInfo.label})</span>
                         </div>
                         <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden border border-white/10">
                             <div id="stampProgressBar" class="bg-gradient-to-r from-cyan-400 via-blue-500 to-amber-400 h-full rounded-full transition-all duration-300" style="width: ${progressPct}%"></div>
@@ -474,7 +486,7 @@
                 `;
             } else {
                 liveClock.textContent = `${t.hours}:${t.minutes}:${t.seconds}`;
-                if (liveProgressText) liveProgressText.textContent = `🎯 목표 달성: ${progressPct}% (${studyTimeText}/${targetHours}시간)`;
+                if (liveProgressText) liveProgressText.textContent = `🎯 목표 달성: ${progressPct}% (${studyTimeText}/${goalInfo.label})`;
                 if (liveProgressBar) liveProgressBar.style.width = `${progressPct}%`;
             }
         }
@@ -489,11 +501,10 @@
                 const selectMood = document.getElementById('selectMood');
 
                 const subjectTag = selectSubject ? selectSubject.value : '[전공상담 - 이상심리학]';
-                const targetHours = selectTargetGoal ? parseInt(selectTargetGoal.value, 10) : 5;
+                const goalInfo = getTargetSecAndLabel(selectTargetGoal ? selectTargetGoal.value : '25m');
                 const moodTag = selectMood ? selectMood.value : '🔥 열공중';
 
-                const targetSec = targetHours * 3600;
-                const progressPct = Math.min(100, Math.round((timerSeconds / targetSec) * 100));
+                const progressPct = Math.min(100, Math.round((timerSeconds / goalInfo.targetSec) * 100));
                 const studyTimeText = formatTime(timerSeconds);
 
                 ctx.save();
@@ -565,7 +576,7 @@
                 // Subline 3: Progress text + Hashtags
                 ctx.fillStyle = '#fde047';
                 ctx.font = `700 ${Math.max(11, Math.floor(width * 0.025))}px "Noto Sans KR", sans-serif`;
-                ctx.fillText(`🎯 달성률: ${progressPct}% (${studyTimeText}/${targetHours}h)`, marginX, height * 0.97);
+                ctx.fillText(`🎯 달성률: ${progressPct}% (${studyTimeText}/${goalInfo.label})`, marginX, height * 0.97);
 
                 const tagX = width * 0.58;
                 ctx.fillStyle = '#67e8f9';
