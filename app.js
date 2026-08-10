@@ -293,27 +293,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const camStartOverlay = document.getElementById('camStartOverlay');
     if (camStartOverlay) {
-        const startCamHandler = async () => {
-            await initCamera();
-            if (currentStream && camStartOverlay) {
-                camStartOverlay.style.display = 'none';
-            } else {
-                const cameraInput = document.getElementById('cameraInput');
-                if (cameraInput) cameraInput.click();
+        const startCamHandler = (e) => {
+            if (e) e.preventDefault();
+            camStartOverlay.style.display = 'none';
+            camStartOverlay.classList.add('hidden');
+            
+            // Auto start stopwatch timer
+            if (!isTimerRunning) {
+                isTimerRunning = true;
+                if (!studyStartTime) studyStartTime = getShortTimeStr();
+                if (timerInterval) clearInterval(timerInterval);
+                timerInterval = setInterval(() => {
+                    timerSeconds++;
+                    updateTimerUI();
+                    renderLiveStamp();
+                }, 1000);
             }
+
+            initCamera().then(() => {
+                if (!currentStream) {
+                    const cameraInput = document.getElementById('cameraInput');
+                    if (cameraInput) cameraInput.click();
+                }
+            });
         };
         camStartOverlay.addEventListener('click', startCamHandler);
-        camStartOverlay.addEventListener('touchstart', startCamHandler, { passive: true });
+        camStartOverlay.addEventListener('touchend', startCamHandler);
     }
 
     const btnIosCamEnable = document.getElementById('btnIosCamEnable');
     if (btnIosCamEnable) {
-        btnIosCamEnable.addEventListener('click', async () => {
-            await initCamera();
-            const cameraInput = document.getElementById('cameraInput');
-            if (!currentStream && cameraInput) {
-                cameraInput.click();
-            }
+        btnIosCamEnable.addEventListener('click', () => {
+            initCamera().then(() => {
+                if (!currentStream) {
+                    const cameraInput = document.getElementById('cameraInput');
+                    if (cameraInput) cameraInput.click();
+                }
+            });
         });
     }
 
