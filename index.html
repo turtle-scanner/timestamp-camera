@@ -260,34 +260,36 @@
         </div>
     </div>
 
-    <!-- Youth Counselor Multiple Choice Quiz Modal -->
+    <!-- Youth Counselor Single Question Quiz Generator Modal -->
     <div id="quizModal" class="fixed inset-0 z-[105] bg-black/90 backdrop-blur-md flex items-center justify-center p-4 hidden">
         <div class="bg-slate-900 border border-cyan-500/40 rounded-2xl p-5 w-full max-w-md flex flex-col gap-3.5 shadow-2xl">
             <div class="flex items-center justify-between border-b border-white/10 pb-2.5">
                 <div class="flex items-center gap-2">
-                    <span class="text-lg">🎯</span>
-                    <h3 class="text-sm font-bold text-cyan-300">청소년상담사 올해 예상 객관식 퀴즈</h3>
+                    <span class="text-lg">🎲</span>
+                    <h3 class="text-sm font-bold text-cyan-300">2026-2027 청소년상담사 적중 예상 문제</h3>
                 </div>
                 <button onclick="closeQuizModal()" class="text-slate-400 hover:text-white text-lg font-bold">✕</button>
             </div>
 
-            <!-- Quiz Card Content -->
+            <!-- Single Question Card Content -->
             <div id="quizCardBox" class="flex flex-col gap-3">
-                <div id="quizQuestionText" class="text-xs font-bold text-slate-100 leading-relaxed bg-slate-950 p-3 rounded-xl border border-white/10">
-                    <!-- Dynamic Question Text -->
+                <div id="quizQuestionText" class="text-xs font-bold text-slate-100 leading-relaxed bg-slate-950 p-3 rounded-xl border border-white/10 shadow-inner">
+                    <!-- Dynamic Single Question Text -->
                 </div>
                 <div id="quizOptionsBox" class="flex flex-col gap-2">
                     <!-- Dynamic Option Buttons -->
                 </div>
-                <div id="quizExplanationBox" class="text-[11px] font-semibold text-emerald-300 bg-emerald-950/40 p-2.5 rounded-xl border border-emerald-500/30 hidden">
+                <div id="quizExplanationBox" class="text-[11px] font-semibold text-emerald-300 bg-emerald-950/40 p-3 rounded-xl border border-emerald-500/30 hidden leading-relaxed">
                     <!-- Explanation -->
                 </div>
             </div>
 
             <div class="flex items-center justify-between pt-2 border-t border-white/10">
-                <span id="quizProgressText" class="text-[11px] font-bold text-amber-300">문제 1 / 2</span>
-                <button id="btnNextQuiz" onclick="loadNextQuizQuestion()" class="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg active:scale-95 transition hidden">
-                    다음 문제 풀기 ➔
+                <button onclick="generateOneQuizQuestion()" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 active:scale-95 transition flex items-center gap-1">
+                    <span>🎲 새 문제 생성</span>
+                </button>
+                <button id="btnNextQuiz" onclick="generateOneQuizQuestion()" class="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg active:scale-95 transition hidden">
+                    다음 문제 ➔
                 </button>
             </div>
         </div>
@@ -623,7 +625,7 @@
             } catch (e) {}
         }
 
-        // Youth Counselor & Professional Counseling Exam Multiple Choice Quiz Bank (6 Key Questions)
+        // Youth Counselor & Professional Counseling Exam Multiple Choice Quiz Bank (8 Key Questions)
         const youthQuizBank = [
             {
                 q: "Q1. 엘리스(Ellis)의 REBT에서 내담자의 비합리적 신념을 객관적으로 검증할 때, 신념의 실용적·효율적 유용성을 따져보는 논박 기법은?",
@@ -660,21 +662,28 @@
                 options: ["① 무조건적 정적 관심", "② 진실성", "③ 공감적 이해", "④ 지금-여기", "⑤ 현상학적 장"],
                 answer: 2,
                 exp: "정답: ③ 공감적 이해. 내담자의 감정과 사적 의미를 마치 자신의 것처럼 느끼는 3대 핵심 태도입니다."
+            },
+            {
+                q: "Q7. 번(Berne)의 교류분석(TA)에서 자아상태 중 이성적이고 현상학적인 사실에 기초하여 객관적으로 정보를 수용하고 처리하는 자아상태는?",
+                options: ["① 어버이 자아 (P)", "② 어른 자아 (A)", "③ 어린이 자아 (C)", "④ 자유 어린이 자아 (FC)", "⑤ 순응 어린이 자아 (AC)"],
+                answer: 1,
+                exp: "정답: ② 어른 자아 (Adult, A). 현실 검증과 정보 처리를 수행하는 컴퓨터와 같은 자아상태입니다."
+            },
+            {
+                q: "Q8. 사회인지진로이론(SCCT)에서 개인의 진로 선택에 직접적 영향을 미치는 맥락 변인 중 진로 결정 직전에 작용하는 변인은?",
+                options: ["① 배경맥락 변인", "② 진입맥락(근경맥락) 변인", "③ 결과기대 변인", "④ 개인적 특질 변인", "⑤ 흥미발달 변인"],
+                answer: 1,
+                exp: "정답: ② 진입맥락(근경맥락) 변인. 진로 실행 및 결정 직전에 작용하는 환경적 지원 및 장애 요인입니다."
             }
         ];
 
-        let selectedQuizSet = [];
-        let currentQuizIdx = 0;
+        let currentSingleQuestion = null;
 
         window.openQuizModal = function() {
-            const shuffled = [...youthQuizBank].sort(() => 0.5 - Math.random());
-            selectedQuizSet = shuffled.slice(0, 2);
-            currentQuizIdx = 0;
-            
             const quizModal = document.getElementById('quizModal');
             if (quizModal) {
                 quizModal.classList.remove('hidden');
-                renderQuizQuestion();
+                generateOneQuizQuestion();
             }
         };
 
@@ -683,59 +692,34 @@
             if (quizModal) quizModal.classList.add('hidden');
         };
 
-        function renderQuizQuestion() {
-            if (currentQuizIdx >= selectedQuizSet.length) {
-                const quizCardBox = document.getElementById('quizCardBox');
-                if (quizCardBox) {
-                    quizCardBox.innerHTML = `
-                        <div class="text-center py-4 flex flex-col gap-2">
-                            <span class="text-3xl">🎉</span>
-                            <h4 class="font-bold text-sm text-cyan-300">청소년상담사 객관식 2문항 풀이 완료!</h4>
-                            <p class="text-xs text-slate-300">스탬프 과목태그가 <b class="text-amber-300">[상담 - 문제풀기]</b> 로 설정되었습니다.</p>
-                            <button onclick="closeQuizModal()" class="mt-2 py-2 px-4 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs">확인 (닫기)</button>
-                        </div>
-                    `;
-                }
-                const btnNextQuiz = document.getElementById('btnNextQuiz');
-                if (btnNextQuiz) btnNextQuiz.style.display = 'none';
-                const quizProgressText = document.getElementById('quizProgressText');
-                if (quizProgressText) quizProgressText.textContent = '풀이 완료! 💯';
+        window.generateOneQuizQuestion = function() {
+            // Pick 1 random question
+            const randomIdx = Math.floor(Math.random() * youthQuizBank.length);
+            currentSingleQuestion = youthQuizBank[randomIdx];
 
-                const selectSubject = document.getElementById('selectSubject');
-                if (selectSubject) {
-                    selectSubject.value = '[상담 - 문제풀기]';
-                    renderLiveStamp();
-                }
-                return;
-            }
-
-            const item = selectedQuizSet[currentQuizIdx];
-            const quizProgressText = document.getElementById('quizProgressText');
-            if (quizProgressText) quizProgressText.textContent = `문제 ${currentQuizIdx + 1} / 2`;
-            
             const quizQuestionText = document.getElementById('quizQuestionText');
-            if (quizQuestionText) quizQuestionText.textContent = item.q;
+            if (quizQuestionText) quizQuestionText.textContent = currentSingleQuestion.q;
 
             const optionsBox = document.getElementById('quizOptionsBox');
             if (optionsBox) {
                 optionsBox.innerHTML = '';
-                item.options.forEach((optText, optIdx) => {
+                currentSingleQuestion.options.forEach((optText, optIdx) => {
                     const btn = document.createElement('button');
-                    btn.className = 'w-full text-left px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-white/10 text-xs font-semibold text-slate-200 transition active:scale-95';
+                    btn.className = 'w-full text-left px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-white/10 text-xs font-semibold text-slate-200 transition active:scale-95';
                     btn.textContent = optText;
-                    btn.onclick = () => checkQuizAnswer(optIdx, item.answer, item.exp, btn);
+                    btn.onclick = () => checkSingleQuizAnswer(optIdx, currentSingleQuestion.answer, currentSingleQuestion.exp, btn);
                     optionsBox.appendChild(btn);
                 });
             }
 
             const expBox = document.getElementById('quizExplanationBox');
             if (expBox) expBox.classList.add('hidden');
-            
+
             const btnNextQuiz = document.getElementById('btnNextQuiz');
             if (btnNextQuiz) btnNextQuiz.style.display = 'none';
-        }
+        };
 
-        function checkQuizAnswer(chosenIdx, correctIdx, expText, clickedBtn) {
+        function checkSingleQuizAnswer(chosenIdx, correctIdx, expText, clickedBtn) {
             const optionsBox = document.getElementById('quizOptionsBox');
             const allBtns = optionsBox.querySelectorAll('button');
             allBtns.forEach(b => b.disabled = true);
@@ -743,15 +727,15 @@
             const expBox = document.getElementById('quizExplanationBox');
 
             if (chosenIdx === correctIdx) {
-                clickedBtn.className = 'w-full text-left px-3 py-2.5 rounded-xl bg-emerald-600 border border-emerald-400 text-xs font-bold text-white shadow-lg';
+                clickedBtn.className = 'w-full text-left px-3.5 py-2.5 rounded-xl bg-emerald-600 border border-emerald-400 text-xs font-bold text-white shadow-lg';
                 clickedBtn.innerHTML += ' ⭕ <b>정답!</b>';
                 if (expBox) expBox.innerHTML = `⭕ <b>정답입니다!</b><br>${expText}`;
             } else {
-                clickedBtn.className = 'w-full text-left px-3 py-2.5 rounded-xl bg-rose-600 border border-rose-400 text-xs font-bold text-white shadow-lg';
+                clickedBtn.className = 'w-full text-left px-3.5 py-2.5 rounded-xl bg-rose-600 border border-rose-400 text-xs font-bold text-white shadow-lg';
                 clickedBtn.innerHTML += ' ❌ <b>오답</b>';
                 
                 if (allBtns[correctIdx]) {
-                    allBtns[correctIdx].className = 'w-full text-left px-3 py-2.5 rounded-xl bg-emerald-700/80 border border-emerald-400 text-xs font-bold text-white';
+                    allBtns[correctIdx].className = 'w-full text-left px-3.5 py-2.5 rounded-xl bg-emerald-700/80 border border-emerald-400 text-xs font-bold text-white';
                     allBtns[correctIdx].innerHTML += ' 👈 <b>(정답)</b>';
                 }
                 if (expBox) expBox.innerHTML = `❌ <b>아쉽네요!</b><br>${expText}`;
@@ -760,6 +744,13 @@
             if (expBox) expBox.classList.remove('hidden');
             const btnNextQuiz = document.getElementById('btnNextQuiz');
             if (btnNextQuiz) btnNextQuiz.style.display = 'block';
+
+            // Auto-set stamp tag to Problem Solving Completed
+            const selectSubject = document.getElementById('selectSubject');
+            if (selectSubject) {
+                selectSubject.value = '[상담 - 문제풀기]';
+                renderLiveStamp();
+            }
         }
 
         window.loadNextQuizQuestion = function() {
