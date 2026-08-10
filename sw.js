@@ -1,4 +1,4 @@
-const CACHE_NAME = 'timestamp-camera-v20260811-3-killer-upgrade-features-fully-loaded';
+const CACHE_NAME = 'timestamp-camera-v20260811-daily-2-stamps-start-end-system-loaded';
 
 self.addEventListener('install', event => {
   self.skipWaiting();

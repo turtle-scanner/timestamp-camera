@@ -171,8 +171,17 @@
             </button>
         </div>
         
-        <!-- 4 Upgrade Feature Controls (Subject, Target Goal, Mood, Hashtags) -->
+        <!-- 4 Upgrade Feature Controls (Stamp Mode, Subject, Target Goal, Mood, Hashtags) -->
         <div class="flex items-center justify-between gap-2 overflow-x-auto no-scrollbar py-1 border-b border-white/10">
+            <!-- 0. Daily 2-Stamp Mode Selector (시작 / 마감 스탬프 선택) -->
+            <div class="flex items-center gap-1 shrink-0">
+                <span class="text-[11px] font-bold text-amber-300">📌 인증:</span>
+                <select id="selectStampType" onchange="renderLiveStamp()" class="bg-slate-900 border border-amber-500/50 rounded-lg px-2 py-1 text-[11px] font-bold text-amber-300 focus:outline-none focus:border-amber-400">
+                    <option value="start">☀️ 시작 스탬프</option>
+                    <option value="end">🌙 마감 스탬프 (시간합산)</option>
+                </select>
+            </div>
+
             <!-- 1. Subject & Study Type Dropdown -->
             <div class="flex items-center gap-1 shrink-0">
                 <span class="text-[11px] font-bold text-cyan-300">📚 과목/유형:</span>
@@ -524,16 +533,71 @@
             return { targetSec: hours * 3600, label: `${hours}시간` };
         }
 
+        // --- 3. Weekly 14-Stamp (Start/End) Tracker Engine ---
+        function getWeeklyStampStatus() {
+            try {
+                const todayStr = `${getFormattedTime().year}-${getFormattedTime().month}-${getFormattedTime().date}`;
+                const startText = localStorage.getItem('start_stamp_text_' + todayStr) || '';
+                const startTs = localStorage.getItem('start_stamp_ts_' + todayStr);
+                
+                let elapsedText = '';
+                if (startTs) {
+                    const diffMs = Math.max(0, Date.now() - parseInt(startTs, 10));
+                    const hrs = Math.floor(diffMs / 3600000);
+                    const mins = Math.floor((diffMs % 3600000) / 60000);
+                    elapsedText = `${hrs}시간 ${mins}분`;
+                }
+
+                // Calculate weekly count (Mon~Sun)
+                const now = new Date();
+                const dayOfWeek = (now.getDay() + 6) % 7; // Mon=0, Sun=6
+                let weeklyCount = 0;
+
+                for (let i = 0; i <= dayOfWeek; i++) {
+                    const d = new Date();
+                    d.setDate(now.getDate() - (dayOfWeek - i));
+                    const y = d.getFullYear();
+                    const m = String(d.getMonth() + 1).padStart(2, '0');
+                    const dt = String(d.getDate()).padStart(2, '0');
+                    const dateKey = `${y}-${m}-${dt}`;
+
+                    if (localStorage.getItem('start_stamp_text_' + dateKey)) weeklyCount++;
+                    if (localStorage.getItem('end_stamp_text_' + dateKey)) weeklyCount++;
+                }
+
+                return { startText, elapsedText, weeklyCount };
+            } catch (e) {
+                return { startText: '', elapsedText: '', weeklyCount: 1 };
+            }
+        }
+
+        function recordStampTypeCapture(stampType) {
+            try {
+                const todayStr = `${getFormattedTime().year}-${getFormattedTime().month}-${getFormattedTime().date}`;
+                const timeText = `${getFormattedTime().hours}:${getFormattedTime().minutes}`;
+
+                if (stampType === 'start') {
+                    localStorage.setItem('start_stamp_text_' + todayStr, timeText);
+                    localStorage.setItem('start_stamp_ts_' + todayStr, String(Date.now()));
+                } else {
+                    localStorage.setItem('end_stamp_text_' + todayStr, timeText);
+                    localStorage.setItem('end_stamp_ts_' + todayStr, String(Date.now()));
+                }
+            } catch (e) {}
+        }
+
         function renderLiveStamp() {
             const stampOverlay = document.getElementById('stampOverlay');
             const headerDDay = document.getElementById('headerDDay');
             const t = getFormattedTime();
             const qItem = counselorQuotes[currentQuoteIndex] || counselorQuotes[0];
 
+            const selectStampType = document.getElementById('selectStampType');
             const selectSubject = document.getElementById('selectSubject');
             const selectTargetGoal = document.getElementById('selectTargetGoal');
             const selectMood = document.getElementById('selectMood');
 
+            const stampType = selectStampType ? selectStampType.value : 'start';
             const subjectTag = selectSubject ? selectSubject.value : '[전공상담 - 이상심리학]';
             const goalInfo = getTargetSecAndLabel(selectTargetGoal ? selectTargetGoal.value : '25m');
             const moodTag = selectMood ? selectMood.value : '🔥 열공중';
@@ -541,6 +605,14 @@
             const streakCnt = getStudyStreakCount();
             const totalCumSec = getTodayCumulativeSec() + timerSeconds;
             const totalCumText = formatTime(totalCumSec);
+
+            const weeklyInfo = getWeeklyStampStatus();
+            const isStartMode = (stampType === 'start');
+
+            let modeBadgeText = isStartMode ? '☀️ 공부 시작 스탬프' : '🌙 공부 마감 스탬프';
+            let summaryDetailText = isStartMode 
+                ? `🎯 목표: ${goalInfo.label} | ⏱️ 오늘누적: ${totalCumText}`
+                : `⏱️ 실 순공: ${weeklyInfo.elapsedText || studyTimeText} (시작: ${weeklyInfo.startText || '08:00'})`;
 
             const progressPct = Math.min(100, Math.round((timerSeconds / goalInfo.targetSec) * 100));
             const studyTimeText = formatTime(timerSeconds);
@@ -562,7 +634,7 @@
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-1.5 flex-wrap">
                                 <span class="text-amber-400 font-black text-xs tracking-wider">🏆 2027 전문상담 1차 ${t.dDayText}</span>
-                                <span class="bg-amber-500/20 text-amber-300 border border-amber-400/40 text-[10px] font-bold px-1.5 py-0.5 rounded-md">🔥 ${streakCnt}일 연속 열공</span>
+                                <span class="bg-amber-500/20 text-amber-300 border border-amber-400/40 text-[10px] font-bold px-1.5 py-0.5 rounded-md">${modeBadgeText}</span>
                                 <span class="bg-cyan-500/20 text-cyan-300 border border-cyan-400/40 text-[10px] font-bold px-1.5 py-0.5 rounded-md">${subjectTag}</span>
                                 <span class="bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 text-[10px] font-bold px-1.5 py-0.5 rounded-md">${moodTag}</span>
                             </div>
@@ -570,20 +642,20 @@
                         </div>
                         <div class="flex items-baseline justify-between py-0.5">
                             <span id="stampLiveClock" class="font-display font-black text-2xl text-white tracking-tight leading-none">${t.hours}:${t.minutes}:${t.seconds}</span>
-                            <span id="stampProgressText" class="text-[11px] font-bold text-amber-300">🎯 목표: ${progressPct}% (${studyTimeText}/${goalInfo.label}) | ⏱️ 오늘누적: ${totalCumText}</span>
+                            <span id="stampProgressText" class="text-[11px] font-bold text-amber-300">${summaryDetailText}</span>
                         </div>
                         <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden border border-white/10">
                             <div id="stampProgressBar" class="bg-gradient-to-r from-cyan-400 via-blue-500 to-amber-400 h-full rounded-full transition-all duration-300" style="width: ${progressPct}%"></div>
                         </div>
                         <div class="flex items-center justify-between text-[10px] text-slate-300 pt-1 border-t border-white/10">
                             <span class="text-cyan-200 font-gowun truncate max-w-[65%]">💡 <b>${qItem.scholar}</b>: "${qItem.quote}"</span>
-                            <span class="text-amber-300 font-bold shrink-0">#${t.dDayText} #상담천개의문 #🔥${streakCnt}일차</span>
+                            <span class="text-amber-300 font-bold shrink-0">#${t.dDayText} #주간${weeklyInfo.weeklyCount}/14스탬프 #🔥${streakCnt}일차</span>
                         </div>
                     </div>
                 `;
             } else {
                 liveClock.textContent = `${t.hours}:${t.minutes}:${t.seconds}`;
-                if (liveProgressText) liveProgressText.textContent = `🎯 목표: ${progressPct}% (${studyTimeText}/${goalInfo.label}) | ⏱️ 오늘누적: ${totalCumText}`;
+                if (liveProgressText) liveProgressText.textContent = summaryDetailText;
                 if (liveProgressBar) liveProgressBar.style.width = `${progressPct}%`;
             }
         }
@@ -593,17 +665,24 @@
                 const t = getFormattedTime();
                 const qItem = counselorQuotes[currentQuoteIndex] || counselorQuotes[0];
 
+                const selectStampType = document.getElementById('selectStampType');
                 const selectSubject = document.getElementById('selectSubject');
                 const selectTargetGoal = document.getElementById('selectTargetGoal');
                 const selectMood = document.getElementById('selectMood');
 
+                const stampType = selectStampType ? selectStampType.value : 'start';
                 const subjectTag = selectSubject ? selectSubject.value : '[전공상담 - 이상심리학]';
                 const goalInfo = getTargetSecAndLabel(selectTargetGoal ? selectTargetGoal.value : '25m');
                 const moodTag = selectMood ? selectMood.value : '🔥 열공중';
 
+                recordStampTypeCapture(stampType);
                 const streakCnt = getStudyStreakCount();
                 const totalCumSec = addTodayCumulativeSec(timerSeconds);
                 const totalCumText = formatTime(totalCumSec);
+                const weeklyInfo = getWeeklyStampStatus();
+
+                const isStartMode = (stampType === 'start');
+                let modeBadgeText = isStartMode ? '☀️ 공부 시작' : '🌙 공부 마감';
 
                 const progressPct = Math.min(100, Math.round((timerSeconds / goalInfo.targetSec) * 100));
                 const studyTimeText = formatTime(timerSeconds);
@@ -634,10 +713,10 @@
 
                 const marginX = width * 0.04;
 
-                // 1. Top Line: D-Day + Streak Badge + Subject Tag + Mood Tag
+                // 1. Top Line: D-Day + Stamp Mode + Streak + Subject Tag + Mood Tag
                 ctx.fillStyle = '#fbbf24';
                 ctx.font = `800 ${Math.max(16, Math.floor(width * 0.038))}px "Noto Sans KR", sans-serif`;
-                ctx.fillText(`🏆 2027 전문상담 1차 ${t.dDayText}  🔥${streakCnt}일연속  ${subjectTag}  ${moodTag}`, marginX, height * 0.048);
+                ctx.fillText(`🏆 2027 전문상담 1차 ${t.dDayText}  [${modeBadgeText}]  🔥${streakCnt}일연속  ${subjectTag}`, marginX, height * 0.048);
 
                 // 2. Top Subline: Counselor Quote & Exam Vaccine Tip
                 ctx.fillStyle = '#67e8f9';
@@ -674,15 +753,20 @@
                 ctx.fillStyle = fillGrad;
                 ctx.fillRect(marginX, barY, activeWidth, barHeight);
 
-                // Subline 3: Progress text + Cumulative Time + Hashtags
+                // Subline 3: Progress text + Elapsed Time + Weekly Status
                 ctx.fillStyle = '#fde047';
                 ctx.font = `700 ${Math.max(11, Math.floor(width * 0.025))}px "Noto Sans KR", sans-serif`;
-                ctx.fillText(`🎯 달성: ${progressPct}% (${studyTimeText}/${goalInfo.label}) | ⏱️ 오늘누적: ${totalCumText}`, marginX, height * 0.97);
+                
+                let printDetailText = isStartMode 
+                    ? `🎯 목표: ${goalInfo.label} | ⏱️ 오늘누적: ${totalCumText}`
+                    : `⏱️ 실 순공: ${weeklyInfo.elapsedText || studyTimeText} (시작: ${weeklyInfo.startText || '08:00'})`;
+                
+                ctx.fillText(printDetailText, marginX, height * 0.97);
 
                 const tagX = width * 0.58;
                 ctx.fillStyle = '#67e8f9';
                 ctx.font = `800 ${Math.max(11, Math.floor(width * 0.025))}px "Noto Sans KR", sans-serif`;
-                ctx.fillText(`#${t.dDayText} #상담천개의문 #🔥${streakCnt}일차`, tagX, height * 0.97);
+                ctx.fillText(`#${t.dDayText} #주간14스탬프(${weeklyInfo.weeklyCount}/14) #🔥${streakCnt}일차`, tagX, height * 0.97);
 
                 ctx.restore();
             } catch (e) {}
