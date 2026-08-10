@@ -1,4 +1,4 @@
-const CACHE_NAME = 'timestamp-camera-v20260811-cam-touch-v2';
+const CACHE_NAME = 'timestamp-camera-v20260811-direct-cam-start-now';
 
 self.addEventListener('install', event => {
   self.skipWaiting();

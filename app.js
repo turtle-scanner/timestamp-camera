@@ -277,7 +277,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 video.classList.remove('hidden');
                 if (liveViewportCanvas) liveViewportCanvas.style.display = 'none';
                 if (iosCamBanner) iosCamBanner.style.display = 'none';
-                if (camStartOverlay) camStartOverlay.style.display = 'none';
                 success = true;
                 break;
             } catch (err) {
@@ -289,36 +288,6 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('All live camera attempts failed. Showing iOS Native Camera Banner.');
             if (iosCamBanner) iosCamBanner.style.display = 'flex';
         }
-    }
-
-    const camStartOverlay = document.getElementById('camStartOverlay');
-    if (camStartOverlay) {
-        const startCamHandler = (e) => {
-            if (e) e.preventDefault();
-            camStartOverlay.style.display = 'none';
-            camStartOverlay.classList.add('hidden');
-            
-            // Auto start stopwatch timer
-            if (!isTimerRunning) {
-                isTimerRunning = true;
-                if (!studyStartTime) studyStartTime = getShortTimeStr();
-                if (timerInterval) clearInterval(timerInterval);
-                timerInterval = setInterval(() => {
-                    timerSeconds++;
-                    updateTimerUI();
-                    renderLiveStamp();
-                }, 1000);
-            }
-
-            initCamera().then(() => {
-                if (!currentStream) {
-                    const cameraInput = document.getElementById('cameraInput');
-                    if (cameraInput) cameraInput.click();
-                }
-            });
-        };
-        camStartOverlay.addEventListener('click', startCamHandler);
-        camStartOverlay.addEventListener('touchend', startCamHandler);
     }
 
     const btnIosCamEnable = document.getElementById('btnIosCamEnable');
