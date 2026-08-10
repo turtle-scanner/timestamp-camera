@@ -1,4 +1,4 @@
-const CACHE_NAME = 'timestamp-camera-v20260811-click-shoot-perfect';
+const CACHE_NAME = 'timestamp-camera-v20260811-global-click-working';
 
 self.addEventListener('install', event => {
   self.skipWaiting();

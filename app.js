@@ -138,31 +138,32 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     updateStartBtnText();
 
-    btnStartTimer.addEventListener('click', (e) => {
-        // 1. Ensure stopwatch timer is running
-        if (!isTimerRunning) {
-            isTimerRunning = true;
-            if (!studyStartTime) studyStartTime = getShortTimeStr();
-            if (timerInterval) clearInterval(timerInterval);
-            timerInterval = setInterval(() => {
-                timerSeconds++;
-                updateTimerUI();
-                renderLiveStamp();
-            }, 1000);
-        }
+    // Global Unconditional Click Handler for Start & Capture Button
+    window.handleStartAndCapture = function(e) {
+        if (e) e.preventDefault();
 
-        // 2. If live camera stream is not active, immediately open native camera capture
-        if (!currentStream || !video || video.videoWidth === 0) {
-            const cameraInput = document.getElementById('cameraInput');
-            if (cameraInput) {
-                cameraInput.click();
-                return;
-            }
-        }
+        // 1. Force start stopwatch timer immediately
+        isTimerRunning = true;
+        if (!studyStartTime) studyStartTime = getShortTimeStr();
+        if (timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            timerSeconds++;
+            updateTimerUI();
+            renderLiveStamp();
+        }, 1000);
 
-        // 3. Otherwise trigger live snapshot capture
-        triggerSnapshot(e);
-    });
+        // 2. Rotate to next quote
+        nextQuote();
+        renderLiveStamp();
+
+        // 3. Immediately trigger camera file picker or snapshot
+        const cameraInput = document.getElementById('cameraInput');
+        if (currentStream && video && video.videoWidth > 0) {
+            triggerSnapshot(e);
+        } else if (cameraInput) {
+            cameraInput.click();
+        }
+    };
 
     btnResetTimer.addEventListener('click', () => {
         if (confirm('오늘 순공 시간 및 시작/끝 시간을 초기화하시겠습니까?')) {
