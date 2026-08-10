@@ -1,4 +1,4 @@
-const CACHE_NAME = 'timestamp-camera-v20260811-layout-raised-cam-fixed';
+const CACHE_NAME = 'timestamp-camera-v20260811-stopwatch-auto-run-final';
 
 self.addEventListener('install', event => {
   self.skipWaiting();

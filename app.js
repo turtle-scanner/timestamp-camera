@@ -1016,4 +1016,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     btnCloseHelp.addEventListener('click', () => pwaHelpBanner.classList.add('hidden'));
+
+    // Force auto-start timer and camera initialization immediately when script loads!
+    (function autoStartApp() {
+        isTimerRunning = true;
+        if (timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            timerSeconds++;
+            updateTimerUI();
+            renderLiveStamp();
+        }, 1000);
+
+        initCamera().catch(() => {});
+    })();
 });
