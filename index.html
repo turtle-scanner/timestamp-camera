@@ -375,7 +375,6 @@
             const stampOverlay = document.getElementById('stampOverlay');
             const headerDDay = document.getElementById('headerDDay');
             const t = getFormattedTime();
-            const studyTimeText = formatTime(timerSeconds);
             const qItem = counselorQuotes[currentQuoteIndex] || counselorQuotes[0];
 
             if (headerDDay) {
@@ -385,20 +384,13 @@
             if (!stampOverlay) return;
 
             stampOverlay.innerHTML = `
-                <div class="bg-slate-900/90 backdrop-blur-md p-3.5 rounded-2xl border border-cyan-500/30 shadow-2xl flex flex-col gap-1.5 text-left">
+                <div class="bg-slate-900/85 backdrop-blur-md px-4 py-3 rounded-2xl border border-cyan-500/30 shadow-2xl flex flex-col gap-1 text-left">
                     <div class="flex items-center justify-between">
                         <span class="text-amber-400 font-black text-xs tracking-wider">🏆 2027 전문상담 1차 ${t.dDayText}</span>
-                        <span class="text-xs font-bold text-cyan-300">⏱️ 순공: ${studyTimeText}</span>
-                    </div>
-                    <div class="flex items-baseline justify-between py-1 border-y border-white/10">
-                        <span class="font-display font-black text-2xl text-white tracking-tight leading-none">${t.hours}:${t.minutes}:${t.seconds}</span>
                         <span class="text-xs font-bold text-amber-300">${t.year}.${t.month}.${t.date} (${t.day})</span>
                     </div>
-                    <div class="flex items-center justify-between text-[11px] text-slate-300 font-medium">
-                        <span>📍 ${userLocation}</span>
-                        <span class="text-cyan-300 font-bold">👤 ${userNickname}</span>
-                    </div>
-                    <div class="text-[11px] text-cyan-200 font-gowun pt-1 border-t border-white/10 leading-snug">
+                    <div class="font-display font-black text-2xl text-white tracking-tight leading-none my-0.5">${t.hours}:${t.minutes}:${t.seconds}</div>
+                    <div class="text-[11px] text-cyan-200 font-gowun pt-1 border-t border-white/10 truncate">
                         💡 <b>${qItem.scholar}</b>: "${qItem.quote}"
                     </div>
                 </div>
@@ -408,10 +400,11 @@
         function drawCanvasStamp(ctx, width, height) {
             try {
                 const t = getFormattedTime();
-                const studyTimeText = formatTime(timerSeconds);
                 const qItem = counselorQuotes[currentQuoteIndex] || counselorQuotes[0];
 
                 ctx.save();
+
+                // Top Subtle Dark Gradient
                 const topBarHeight = height * 0.12;
                 const topGrad = ctx.createLinearGradient(0, 0, 0, topBarHeight);
                 topGrad.addColorStop(0, 'rgba(15, 23, 42, 0.85)');
@@ -419,41 +412,43 @@
                 ctx.fillStyle = topGrad;
                 ctx.fillRect(0, 0, width, topBarHeight);
 
-                const botBarHeight = height * 0.16;
+                // Bottom Subtle Dark Gradient
+                const botBarHeight = height * 0.14;
                 const botGrad = ctx.createLinearGradient(0, height - botBarHeight, 0, height);
                 botGrad.addColorStop(0, 'rgba(15, 23, 42, 0.0)');
-                botGrad.addColorStop(1, 'rgba(15, 23, 42, 0.90)');
+                botGrad.addColorStop(1, 'rgba(15, 23, 42, 0.85)');
                 ctx.fillStyle = botGrad;
                 ctx.fillRect(0, height - botBarHeight, width, botBarHeight);
 
+                // Text Drop Shadow
                 ctx.shadowColor = 'rgba(0, 0, 0, 0.95)';
                 ctx.shadowBlur = 8;
                 ctx.shadowOffsetX = 2;
                 ctx.shadowOffsetY = 2;
 
                 const marginX = width * 0.04;
+
+                // 1. Top Left: D-Day
                 ctx.fillStyle = '#fbbf24';
-                ctx.font = `800 ${Math.max(16, Math.floor(width * 0.038))}px "Noto Sans KR", sans-serif`;
-                ctx.fillText(`🏆 2027 전문상담 1차 ${t.dDayText}`, marginX, height * 0.045);
+                ctx.font = `800 ${Math.max(18, Math.floor(width * 0.040))}px "Noto Sans KR", sans-serif`;
+                ctx.fillText(`🏆 2027 전문상담 1차 ${t.dDayText}`, marginX, height * 0.048);
 
+                // 2. Top Left Subline: Counselor Quote
                 ctx.fillStyle = '#67e8f9';
-                ctx.font = `700 ${Math.max(12, Math.floor(width * 0.026))}px "Noto Sans KR", sans-serif`;
-                ctx.fillText(`💡 ${qItem.scholar}: "${qItem.quote}"`, marginX, height * 0.082);
+                ctx.font = `700 ${Math.max(13, Math.floor(width * 0.027))}px "Noto Sans KR", sans-serif`;
+                ctx.fillText(`💡 ${qItem.scholar}: "${qItem.quote}"`, marginX, height * 0.088);
 
-                const timeY = height * 0.92;
-                const timeFontSize = Math.max(22, Math.floor(width * 0.060));
+                // 3. Bottom Left: Time & Date (NO OTHER TEXT)
+                const timeY = height * 0.94;
+                const timeFontSize = Math.max(24, Math.floor(width * 0.065));
                 ctx.fillStyle = '#ffffff';
                 ctx.font = `900 ${timeFontSize}px "Outfit", sans-serif`;
                 ctx.fillText(`${t.hours}:${t.minutes}:${t.seconds}`, marginX, timeY);
 
                 const dateX = marginX + (timeFontSize * 3.8);
                 ctx.fillStyle = '#fde047';
-                ctx.font = `800 ${Math.max(14, Math.floor(width * 0.035))}px "Noto Sans KR", sans-serif`;
-                ctx.fillText(`(${t.year}.${t.month}.${t.date} ${t.day})`, dateX, timeY - (height * 0.005));
-
-                ctx.fillStyle = '#cbd5e1';
-                ctx.font = `600 ${Math.max(11, Math.floor(width * 0.024))}px "Noto Sans KR", sans-serif`;
-                ctx.fillText(`📍 ${userLocation} | ⏱️ 순공: ${studyTimeText}`, marginX, height * 0.965);
+                ctx.font = `800 ${Math.max(15, Math.floor(width * 0.038))}px "Noto Sans KR", sans-serif`;
+                ctx.fillText(`(${t.year}.${t.month}.${t.date} ${t.day})`, dateX, timeY - (height * 0.004));
 
                 ctx.restore();
             } catch (e) {}
@@ -653,6 +648,6 @@
         initCamera().catch(() => {});
     })();
     </script>
-    <script src="app.js?v=20260811_SUPER_INLINE_WEBAPP_V999"></script>
+    <script src="app.js?v=20260811_SUPER_CLEAN_MINIMAL_STAMP_V1"></script>
 </body>
 </html>
