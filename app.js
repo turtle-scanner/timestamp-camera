@@ -139,6 +139,28 @@ document.addEventListener('DOMContentLoaded', () => {
     updateStartBtnText();
 
     btnStartTimer.addEventListener('click', (e) => {
+        // 1. Ensure stopwatch timer is running
+        if (!isTimerRunning) {
+            isTimerRunning = true;
+            if (!studyStartTime) studyStartTime = getShortTimeStr();
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timerSeconds++;
+                updateTimerUI();
+                renderLiveStamp();
+            }, 1000);
+        }
+
+        // 2. If live camera stream is not active, immediately open native camera capture
+        if (!currentStream || !video || video.videoWidth === 0) {
+            const cameraInput = document.getElementById('cameraInput');
+            if (cameraInput) {
+                cameraInput.click();
+                return;
+            }
+        }
+
+        // 3. Otherwise trigger live snapshot capture
         triggerSnapshot(e);
     });
 
