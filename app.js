@@ -379,7 +379,7 @@ document.addEventListener('DOMContentLoaded', () => {
         quoteBanner.addEventListener('click', nextQuote);
     }
 
-    // Auto Roll Quote every 7 seconds
+    // Auto Roll Quote every 7 seconds or on shutter click
     setInterval(nextQuote, 7000);
     updateQuoteUI();
 
@@ -394,9 +394,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const minutes = String(now.getMinutes()).padStart(2, '0');
         const seconds = String(now.getSeconds()).padStart(2, '0');
 
-        // Target Exam Date (2026-11-21 for 2027 Exam, midnight exact comparison)
+        // Target Exam Date (Nov 21, 2026 for 2027 Exam, midnight exact comparison)
         const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const examDate = new Date(2026, 10, 21); // Nov 21, 2026
+        const examDate = new Date(2026, 10, 21); // Month 10 is November (0-indexed)
         const diffTime = examDate - todayMidnight;
         const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
         
@@ -413,8 +413,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Update Header D-Day
     function updateHeaderDDay() {
         const t = getFormattedTime();
-        headerDDay.textContent = `2027 전문상담 1차 ${t.dDayText}`;
+        if (headerDDay) {
+            headerDDay.textContent = `2027 전문상담 1차 ${t.dDayText}`;
+        }
     }
+    setInterval(updateHeaderDDay, 1000);
     updateHeaderDDay();
 
     // Render Watermark Overlay on Screen
@@ -725,6 +728,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Core Snapshot Functionality (Guaranteed Immediate Execution)
     function triggerSnapshot(e) {
+        // Rotate to Next Scholar Quote on EVERY shutter click!
+        nextQuote();
+        renderLiveStamp();
+
         // iOS Fallback: If live WebRTC camera is blocked/inactive on iPhone Safari, trigger native camera
         if (!currentStream || !video || video.videoWidth === 0) {
             const cameraInput = document.getElementById('cameraInput');
