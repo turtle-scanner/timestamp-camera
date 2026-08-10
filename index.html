@@ -311,13 +311,19 @@
             { scholar: "마틴 셀리그만 (Seligman)", theory: "긍정심리학 - PERMA 강점", quote: "학습된 무기력에서 벗어나라. 내 안의 강점과 긍정 정서가 성취의 큰 문을 연다. 🔥" }
         ];
 
+        // Force purge old localstorage location & nickname keys completely
+        try {
+            localStorage.removeItem('user_location');
+            localStorage.removeItem('user_nickname');
+        } catch (e) {}
+
         let currentQuoteIndex = 0;
         let timerSeconds = 0;
         let isTimerRunning = true;
         let timerInterval = null;
         let currentStream = null;
         let facingMode = 'environment';
-        let userNickname = '수석 합격';
+        let userNickname = '';
         let userLocation = '';
         let capturedBlob = null;
         const daysKo = ['일', '월', '화', '수', '목', '금', '토'];
@@ -648,6 +654,6 @@
         initCamera().catch(() => {});
     })();
     </script>
-    <script src="app.js?v=20260811_REMOVE_INCHEON_YEONSU_LOCATION"></script>
+    <script src="app.js?v=20260811_PURGE_LOCALSTORAGE_LOCATION_NOW"></script>
 </body>
 </html>

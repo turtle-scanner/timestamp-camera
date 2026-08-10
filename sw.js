@@ -1,4 +1,4 @@
-const CACHE_NAME = 'timestamp-camera-v20260811-remove-location-v1';
+const CACHE_NAME = 'timestamp-camera-v20260811-purge-localstorage-location';
 
 self.addEventListener('install', event => {
   self.skipWaiting();
