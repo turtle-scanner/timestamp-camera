@@ -1,4 +1,4 @@
-const CACHE_NAME = 'timestamp-camera-v20260811-shutter-button-separated-from-photo';
+const CACHE_NAME = 'timestamp-camera-v20260811-instant-auto-save-engine-loaded';
 
 self.addEventListener('install', event => {
   self.skipWaiting();

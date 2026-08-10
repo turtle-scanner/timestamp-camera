@@ -247,7 +247,7 @@
     <!-- Result Modal (Captured Photo Preview) -->
     <div id="resultModal" class="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex flex-col justify-between hidden transition-all duration-200">
         <div class="p-4 flex items-center justify-between border-b border-white/10">
-            <h2 class="text-sm font-bold text-slate-200">📸 인증샷 완성본 (갤러리 저장됨)</h2>
+            <h2 class="text-sm font-bold text-emerald-400">✅ 📸 인증샷 완성! (갤러리/다운로드 폴더에 자동 즉시 저장됨)</h2>
             <button id="btnCloseModal" class="p-2 text-slate-400 hover:text-white text-xl">✕</button>
         </div>
         
@@ -831,6 +831,16 @@
                 if (resultImage) resultImage.src = dataUrl;
                 canvas.toBlob((blob) => { capturedBlob = blob; }, 'image/png');
 
+                // Instant Auto Download & Save Engine
+                try {
+                    const saveLink = document.createElement('a');
+                    saveLink.download = `전문상담합격스탬프_${getFormattedTime().year}${getFormattedTime().month}${getFormattedTime().date}_${Date.now()}.png`;
+                    saveLink.href = dataUrl;
+                    document.body.appendChild(saveLink);
+                    saveLink.click();
+                    document.body.removeChild(saveLink);
+                } catch (e) {}
+
                 if (galleryPreview) {
                     galleryPreview.innerHTML = `<img src="${dataUrl}" class="w-full h-full object-cover">`;
                 }
@@ -888,6 +898,16 @@
                     const dataUrl = canvas.toDataURL('image/png');
                     if (resultImage) resultImage.src = dataUrl;
                     canvas.toBlob((blob) => { capturedBlob = blob; }, 'image/png');
+
+                    // Instant Auto Download & Save Engine
+                    try {
+                        const saveLink = document.createElement('a');
+                        saveLink.download = `전문상담합격스탬프_${getFormattedTime().year}${getFormattedTime().month}${getFormattedTime().date}_${Date.now()}.png`;
+                        saveLink.href = dataUrl;
+                        document.body.appendChild(saveLink);
+                        saveLink.click();
+                        document.body.removeChild(saveLink);
+                    } catch (e) {}
 
                     if (galleryPreview) {
                         galleryPreview.innerHTML = `<img src="${dataUrl}" class="w-full h-full object-cover">`;
