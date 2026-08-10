@@ -383,7 +383,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(nextQuote, 7000);
     updateQuoteUI();
 
-    // Live Date/Time Formatter (Midnight-based Precise D-Day Calculation)
+    // Live Date/Time Formatter (Exact Midnight Comparison for D-Day)
     function getFormattedTime() {
         const now = new Date();
         const year = now.getFullYear();
@@ -394,11 +394,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const minutes = String(now.getMinutes()).padStart(2, '0');
         const seconds = String(now.getSeconds()).padStart(2, '0');
 
-        // Target Exam Date (Nov 21, 2026 for 2027 Exam, midnight exact comparison)
+        // Target Exam Date: Nov 21, 2026 (Month 10 is Nov, 0-indexed)
         const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const examDate = new Date(2026, 10, 21); // Month 10 is November (0-indexed)
-        const diffTime = examDate - todayMidnight;
-        const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+        const examDate = new Date(2026, 10, 21);
+        const diffMs = examDate.getTime() - todayMidnight.getTime();
+        const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
         
         let dDayText = 'D-DAY';
         if (diffDays > 0) {
@@ -867,97 +867,73 @@ document.addEventListener('DOMContentLoaded', () => {
         elem.addEventListener('pointerdown', triggerSnapshot);
     });
 
-    // Draw Watermark on Canvas Image
+    // Draw Watermark on Canvas Image (Guaranteed High-Contrast Engraving)
     function drawCanvasStamp(ctx, width, height) {
-        const t = getFormattedTime();
-        const studyTimeText = formatTime(timerSeconds);
-        const padding = width * 0.03;
-        const boxHeight = height * 0.12; // Ultra Slim Transparent Height
-        const boxY = height - boxHeight - padding;
+        try {
+            const t = getFormattedTime();
+            const studyTimeText = formatTime(timerSeconds);
+            const qItem = counselorQuotes[currentQuoteIndex] || { scholar: "칼 로저스", quote: "나 스스로 성장의 힘을 가지고 있다." };
 
-        if (currentTheme === 'minimal') {
-            // Top Area: Exam D-Day Banner
-            const topY = height * 0.04;
-            const topX = width * 0.05;
+            ctx.save();
 
-            // Top Subtle Backdrop Overlay
-            const topGradient = ctx.createLinearGradient(0, 0, 0, height * 0.10);
-            topGradient.addColorStop(0, 'rgba(0, 0, 0, 0.65)');
-            topGradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-            ctx.fillStyle = topGradient;
-            ctx.fillRect(0, 0, width, height * 0.10);
+            // 1. Top Bar Background Overlay for Extreme High Contrast
+            const topBarHeight = height * 0.12;
+            const topGrad = ctx.createLinearGradient(0, 0, 0, topBarHeight);
+            topGrad.addColorStop(0, 'rgba(15, 23, 42, 0.85)');
+            topGrad.addColorStop(1, 'rgba(15, 23, 42, 0.0)');
+            ctx.fillStyle = topGrad;
+            ctx.fillRect(0, 0, width, topBarHeight);
 
-            // Drop Shadow for Extreme Legibility
+            // 2. Bottom Bar Background Overlay for Extreme High Contrast
+            const botBarHeight = height * 0.16;
+            const botGrad = ctx.createLinearGradient(0, height - botBarHeight, 0, height);
+            botGrad.addColorStop(0, 'rgba(15, 23, 42, 0.0)');
+            botGrad.addColorStop(1, 'rgba(15, 23, 42, 0.90)');
+            ctx.fillStyle = botGrad;
+            ctx.fillRect(0, height - botBarHeight, width, botBarHeight);
+
+            // Common Drop Shadow for Crisp Text
             ctx.shadowColor = 'rgba(0, 0, 0, 0.95)';
-            ctx.shadowBlur = 10;
-            ctx.shadowOffsetX = 1;
-            ctx.shadowOffsetY = 1;
+            ctx.shadowBlur = 8;
+            ctx.shadowOffsetX = 2;
+            ctx.shadowOffsetY = 2;
 
-            const qItem = counselorQuotes[currentQuoteIndex];
+            const marginX = width * 0.04;
 
-            // Top Left: Exam D-Day Banner & Counselor Quote
-            ctx.fillStyle = '#fbbf24';
-            ctx.font = `800 ${width * 0.038}px sans-serif`;
-            ctx.fillText(`🏆 2027 전문상담 ${t.dDayText}`, topX, topY + (height * 0.032));
+            // --- TOP AREA: D-Day Banner & Counselor Quote ---
+            // Line 1: D-Day Title
+            ctx.fillStyle = '#fbbf24'; // Gold
+            ctx.font = `800 ${Math.max(16, Math.floor(width * 0.038))}px "Noto Sans KR", sans-serif`;
+            ctx.fillText(`🏆 2027 전문상담 1차 ${t.dDayText}`, marginX, height * 0.045);
 
-            ctx.fillStyle = '#67e8f9';
-            ctx.font = `700 ${width * 0.026}px sans-serif`;
-            ctx.fillText(`💡 ${qItem.scholar}: "${qItem.quote}"`, topX, topY + (height * 0.068));
+            // Line 2: Scholar Quote & Theory
+            ctx.fillStyle = '#67e8f9'; // Cyan
+            ctx.font = `700 ${Math.max(12, Math.floor(width * 0.026))}px "Noto Sans KR", sans-serif`;
+            ctx.fillText(`💡 ${qItem.scholar}: "${qItem.quote}"`, marginX, height * 0.082);
 
-            // Bottom Area: Date & Time ONLY (2-5반 removed)
-            const botBoxHeight = height * 0.10;
-            const botY = height - botBoxHeight - (height * 0.03);
-            const botX = width * 0.05;
-
-            // Transparent Soft Gradient Overlay at Bottom
-            const gradient = ctx.createLinearGradient(0, height - botBoxHeight - 30, 0, height);
-            gradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
-            gradient.addColorStop(0.4, 'rgba(0, 0, 0, 0.40)');
-            gradient.addColorStop(1, 'rgba(0, 0, 0, 0.75)');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, height - botBoxHeight - 30, width, botBoxHeight + 30);
-
-            // Large Time & Date
+            // --- BOTTOM AREA: Time, Date & Study Time ---
+            const timeY = height * 0.92;
+            const timeFontSize = Math.max(22, Math.floor(width * 0.060));
             ctx.fillStyle = '#ffffff';
-            ctx.font = `900 ${width * 0.058}px sans-serif`;
-            ctx.fillText(`${t.hours}:${t.minutes}:${t.seconds}`, botX, botY + (botBoxHeight * 0.65));
+            ctx.font = `900 ${timeFontSize}px "Outfit", sans-serif`;
+            ctx.fillText(`${t.hours}:${t.minutes}:${t.seconds}`, marginX, timeY);
 
-            ctx.fillStyle = '#fde047';
-            ctx.font = `800 ${width * 0.040}px sans-serif`;
-            ctx.fillText(` (${t.year}.${t.month}.${t.date} ${t.day})`, botX + (width * 0.27), botY + (botBoxHeight * 0.65));
+            // Date next to time
+            const dateX = marginX + (timeFontSize * 3.8);
+            ctx.fillStyle = '#fde047'; // Yellow
+            ctx.font = `800 ${Math.max(14, Math.floor(width * 0.035))}px "Noto Sans KR", sans-serif`;
+            ctx.fillText(`(${t.year}.${t.month}.${t.date} ${t.day})`, dateX, timeY - (height * 0.005));
 
-            // Reset Shadow Effect
-            ctx.shadowColor = 'transparent';
-            ctx.shadowBlur = 0;
-            ctx.shadowOffsetX = 0;
-            ctx.shadowOffsetY = 0;
+            // Subline: Location & Stopwatch
+            ctx.fillStyle = '#cbd5e1';
+            ctx.font = `600 ${Math.max(11, Math.floor(width * 0.024))}px "Noto Sans KR", sans-serif`;
+            ctx.fillText(`📍 ${userLocation} | ⏱️ 순공: ${studyTimeText}`, marginX, height * 0.965);
 
-        } else if (currentTheme === 'dday_study') {
-            // Center Floating Backdrop Box (Centered Viewport Placement)
-            const stampWidth = width * 0.90;
-            const stampHeight = height * 0.20; // 20% height for 4 spacious rows
-            const stampX = (width - stampWidth) / 2;
-            const stampY = height * 0.40; // Center Viewport Position
-
-            // Super Transparent Glassmorphism Card for High Readability without Blocking Photo
-            ctx.fillStyle = 'rgba(15, 23, 42, 0.28)';
-            ctx.beginPath();
-            if (typeof ctx.roundRect === 'function') {
-                try {
-                    ctx.roundRect(stampX, stampY, stampWidth, stampHeight, width * 0.025);
-                } catch (e) {
-                    ctx.rect(stampX, stampY, stampWidth, stampHeight);
-                }
-            } else {
-                ctx.rect(stampX, stampY, stampWidth, stampHeight);
-            }
-            ctx.fill();
-
-            // Accent Left Gold Bar
-            ctx.fillStyle = '#f59e0b';
-            ctx.beginPath();
-            if (typeof ctx.roundRect === 'function') {
-                try {
+            ctx.restore();
+        } catch (e) {
+            console.error('Error drawing canvas stamp:', e);
+        }
+    }
                     ctx.roundRect(stampX, stampY, width * 0.015, stampHeight, width * 0.015);
                 } catch (e) {
                     ctx.rect(stampX, stampY, width * 0.015, stampHeight);
