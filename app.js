@@ -37,12 +37,7 @@ let isTimerRunning = true;
 let timerInterval = null;
 let currentStream = null;
 let facingMode = 'environment';
-let currentTheme = 'minimal';
-let userNickname = '천개의문 / 초수 / 인천';
-let userLocation = '인천 연수구 독서실';
-let userCustomNote = '가치있는 삶에 전념하기(임용합격) 🔥';
 let capturedBlob = null;
-let studyStartTime = null;
 const daysKo = ['일', '월', '화', '수', '목', '금', '토'];
 
 function formatTime(sec) {
@@ -62,9 +57,8 @@ function getFormattedTime() {
     const minutes = String(now.getMinutes()).padStart(2, '0');
     const seconds = String(now.getSeconds()).padStart(2, '0');
 
-    // Target Exam Date: Nov 21, 2026 (Exact Midnight Comparison)
     const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const examDate = new Date(2026, 10, 21); // Nov 21, 2026
+    const examDate = new Date(2026, 10, 21);
     const diffMs = examDate.getTime() - todayMidnight.getTime();
     const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
     
@@ -72,7 +66,7 @@ function getFormattedTime() {
     if (diffDays > 0) dDayText = `D-${diffDays}`;
     else if (diffDays < 0) dDayText = `D+${Math.abs(diffDays)}`;
 
-    return { year, month, date, day, hours, minutes, seconds, dDayText, fullDateKey: `${year}-${month}-${date}` };
+    return { year, month, date, day, hours, minutes, seconds, dDayText };
 }
 
 function updateQuoteUI() {
@@ -99,8 +93,19 @@ function renderLiveStamp() {
     const stampOverlay = document.getElementById('stampOverlay');
     const headerDDay = document.getElementById('headerDDay');
     const t = getFormattedTime();
-    const studyTimeText = formatTime(timerSeconds);
     const qItem = counselorQuotes[currentQuoteIndex] || counselorQuotes[0];
+
+    const selectSubject = document.getElementById('selectSubject');
+    const selectTargetGoal = document.getElementById('selectTargetGoal');
+    const selectMood = document.getElementById('selectMood');
+
+    const subjectTag = selectSubject ? selectSubject.value : '[전공상담 - 이상심리학]';
+    const targetHours = selectTargetGoal ? parseInt(selectTargetGoal.value, 10) : 5;
+    const moodTag = selectMood ? selectMood.value : '🔥 열공중';
+
+    const targetSec = targetHours * 3600;
+    const progressPct = Math.min(100, Math.round((timerSeconds / targetSec) * 100));
+    const studyTimeText = formatTime(timerSeconds);
 
     if (headerDDay) {
         headerDDay.textContent = `2027 전문상담 1차 ${t.dDayText}`;
@@ -108,49 +113,61 @@ function renderLiveStamp() {
 
     if (!stampOverlay) return;
 
-    const html = `
-        <div class="bg-slate-900/90 backdrop-blur-md p-3.5 rounded-2xl border border-cyan-500/30 shadow-2xl flex flex-col gap-1.5 text-left">
+    stampOverlay.innerHTML = `
+        <div class="bg-slate-900/85 backdrop-blur-md px-4 py-3 rounded-2xl border border-cyan-500/30 shadow-2xl flex flex-col gap-1.5 text-left">
             <div class="flex items-center justify-between">
-                <span class="text-amber-400 font-black text-xs tracking-wider">🏆 2027 전문상담 1차 ${t.dDayText}</span>
-                <span class="text-xs font-bold text-cyan-300">⏱️ 순공: ${studyTimeText}</span>
+                <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="text-amber-400 font-black text-xs tracking-wider">🏆 2027 전문상담 1차 ${t.dDayText}</span>
+                    <span class="bg-cyan-500/20 text-cyan-300 border border-cyan-400/40 text-[10px] font-bold px-1.5 py-0.5 rounded-md">${subjectTag}</span>
+                    <span class="bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 text-[10px] font-bold px-1.5 py-0.5 rounded-md">${moodTag}</span>
+                </div>
+                <span class="text-xs font-bold text-amber-300 shrink-0">${t.year}.${t.month}.${t.date} (${t.day})</span>
             </div>
-            <div class="flex items-baseline justify-between py-1 border-y border-white/10">
+            <div class="flex items-baseline justify-between py-0.5">
                 <span class="font-display font-black text-2xl text-white tracking-tight leading-none">${t.hours}:${t.minutes}:${t.seconds}</span>
-                <span class="text-xs font-bold text-amber-300">${t.year}.${t.month}.${t.date} (${t.day})</span>
+                <span class="text-[11px] font-bold text-amber-300">🎯 목표 달성: ${progressPct}% (${studyTimeText}/${targetHours}시간)</span>
             </div>
-            <div class="flex items-center justify-between text-[11px] text-slate-300 font-medium">
-                <span>📍 ${userLocation}</span>
-                <span class="text-cyan-300 font-bold">👤 ${userNickname}</span>
+            <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden border border-white/10">
+                <div class="bg-gradient-to-r from-cyan-400 via-blue-500 to-amber-400 h-full rounded-full transition-all duration-300" style="width: ${progressPct}%"></div>
             </div>
-            <div class="text-[11px] text-cyan-200 font-gowun pt-1 border-t border-white/10 leading-snug">
-                💡 <b>${qItem.scholar}</b>: "${qItem.quote}"
+            <div class="flex items-center justify-between text-[10px] text-slate-300 pt-1 border-t border-white/10">
+                <span class="text-cyan-200 font-gowun truncate max-w-[65%]">💡 <b>${qItem.scholar}</b>: "${qItem.quote}"</span>
+                <span class="text-amber-300 font-bold shrink-0">#${t.dDayText} #상담천개의문</span>
             </div>
         </div>
     `;
-
-    stampOverlay.innerHTML = html;
 }
 
-// Draw High-Contrast Watermark Stamp on Captured Image Canvas
 function drawCanvasStamp(ctx, width, height) {
     try {
         const t = getFormattedTime();
-        const studyTimeText = formatTime(timerSeconds);
         const qItem = counselorQuotes[currentQuoteIndex] || counselorQuotes[0];
+
+        const selectSubject = document.getElementById('selectSubject');
+        const selectTargetGoal = document.getElementById('selectTargetGoal');
+        const selectMood = document.getElementById('selectMood');
+
+        const subjectTag = selectSubject ? selectSubject.value : '[전공상담 - 이상심리학]';
+        const targetHours = selectTargetGoal ? parseInt(selectTargetGoal.value, 10) : 5;
+        const moodTag = selectMood ? selectMood.value : '🔥 열공중';
+
+        const targetSec = targetHours * 3600;
+        const progressPct = Math.min(100, Math.round((timerSeconds / targetSec) * 100));
+        const studyTimeText = formatTime(timerSeconds);
 
         ctx.save();
 
-        const topBarHeight = height * 0.12;
+        const topBarHeight = height * 0.14;
         const topGrad = ctx.createLinearGradient(0, 0, 0, topBarHeight);
-        topGrad.addColorStop(0, 'rgba(15, 23, 42, 0.85)');
+        topGrad.addColorStop(0, 'rgba(15, 23, 42, 0.88)');
         topGrad.addColorStop(1, 'rgba(15, 23, 42, 0.0)');
         ctx.fillStyle = topGrad;
         ctx.fillRect(0, 0, width, topBarHeight);
 
-        const botBarHeight = height * 0.16;
+        const botBarHeight = height * 0.18;
         const botGrad = ctx.createLinearGradient(0, height - botBarHeight, 0, height);
         botGrad.addColorStop(0, 'rgba(15, 23, 42, 0.0)');
-        botGrad.addColorStop(1, 'rgba(15, 23, 42, 0.90)');
+        botGrad.addColorStop(1, 'rgba(15, 23, 42, 0.88)');
         ctx.fillStyle = botGrad;
         ctx.fillRect(0, height - botBarHeight, width, botBarHeight);
 
@@ -161,18 +178,18 @@ function drawCanvasStamp(ctx, width, height) {
 
         const marginX = width * 0.04;
 
-        // Line 1: D-Day
+        // Line 1: D-Day & Tags
         ctx.fillStyle = '#fbbf24';
         ctx.font = `800 ${Math.max(16, Math.floor(width * 0.038))}px "Noto Sans KR", sans-serif`;
-        ctx.fillText(`🏆 2027 전문상담 1차 ${t.dDayText}`, marginX, height * 0.045);
+        ctx.fillText(`🏆 2027 전문상담 1차 ${t.dDayText}  ${subjectTag}  ${moodTag}`, marginX, height * 0.048);
 
         // Line 2: Quote
         ctx.fillStyle = '#67e8f9';
         ctx.font = `700 ${Math.max(12, Math.floor(width * 0.026))}px "Noto Sans KR", sans-serif`;
-        ctx.fillText(`💡 ${qItem.scholar}: "${qItem.quote}"`, marginX, height * 0.082);
+        ctx.fillText(`💡 ${qItem.scholar}: "${qItem.quote}"`, marginX, height * 0.088);
 
         // Line 3: Time & Date
-        const timeY = height * 0.92;
+        const timeY = height * 0.89;
         const timeFontSize = Math.max(22, Math.floor(width * 0.060));
         ctx.fillStyle = '#ffffff';
         ctx.font = `900 ${timeFontSize}px "Outfit", sans-serif`;
@@ -181,31 +198,45 @@ function drawCanvasStamp(ctx, width, height) {
         const dateX = marginX + (timeFontSize * 3.8);
         ctx.fillStyle = '#fde047';
         ctx.font = `800 ${Math.max(14, Math.floor(width * 0.035))}px "Noto Sans KR", sans-serif`;
-        ctx.fillText(`(${t.year}.${t.month}.${t.date} ${t.day})`, dateX, timeY - (height * 0.005));
+        ctx.fillText(`(${t.year}.${t.month}.${t.date} ${t.day})`, dateX, timeY - (height * 0.004));
 
-        // Line 4: Location & Study Time
-        ctx.fillStyle = '#cbd5e1';
-        ctx.font = `600 ${Math.max(11, Math.floor(width * 0.024))}px "Noto Sans KR", sans-serif`;
-        ctx.fillText(`📍 ${userLocation} | ⏱️ 순공: ${studyTimeText}`, marginX, height * 0.965);
+        // Line 4: Progress Bar
+        const barY = height * 0.93;
+        const barWidth = width * 0.92;
+        const barHeight = Math.max(6, Math.floor(height * 0.012));
+
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+        ctx.fillRect(marginX, barY, barWidth, barHeight);
+
+        const activeWidth = (barWidth * progressPct) / 100;
+        const fillGrad = ctx.createLinearGradient(marginX, 0, marginX + barWidth, 0);
+        fillGrad.addColorStop(0, '#22d3ee');
+        fillGrad.addColorStop(0.5, '#3b82f6');
+        fillGrad.addColorStop(1, '#fbbf24');
+        ctx.fillStyle = fillGrad;
+        ctx.fillRect(marginX, barY, activeWidth, barHeight);
+
+        // Subline 3: Progress text + Hashtags
+        ctx.fillStyle = '#fde047';
+        ctx.font = `700 ${Math.max(11, Math.floor(width * 0.025))}px "Noto Sans KR", sans-serif`;
+        ctx.fillText(`🎯 달성률: ${progressPct}% (${studyTimeText}/${targetHours}h)`, marginX, height * 0.97);
+
+        const tagX = width * 0.58;
+        ctx.fillStyle = '#67e8f9';
+        ctx.font = `800 ${Math.max(11, Math.floor(width * 0.025))}px "Noto Sans KR", sans-serif`;
+        ctx.fillText(`#${t.dDayText} #상담천개의문 #합격인증`, tagX, height * 0.97);
 
         ctx.restore();
-    } catch (e) {
-        console.error('Error drawing canvas stamp:', e);
-    }
+    } catch (e) {}
 }
 
 // Camera Initialization Logic
 async function initCamera() {
     const video = document.getElementById('videoElement');
-    const liveViewportCanvas = document.getElementById('liveViewportCanvas');
-    const iosCamBanner = document.getElementById('iosCamBanner');
-
     if (!video) return;
-
     if (currentStream) {
         currentStream.getTracks().forEach(track => track.stop());
     }
-
     video.setAttribute('playsinline', '');
     video.setAttribute('webkit-playsinline', '');
     video.muted = true;
@@ -218,7 +249,6 @@ async function initCamera() {
         { video: true, audio: false }
     ];
 
-    let success = false;
     for (const constraint of options) {
         try {
             currentStream = await navigator.mediaDevices.getUserMedia(constraint);
@@ -226,20 +256,9 @@ async function initCamera() {
             video.muted = true;
             video.playsInline = true;
             await video.play();
-            
             video.style.display = 'block';
-            video.classList.remove('hidden');
-            if (liveViewportCanvas) liveViewportCanvas.style.display = 'none';
-            if (iosCamBanner) iosCamBanner.style.display = 'none';
-            success = true;
             break;
-        } catch (err) {
-            console.warn('Camera constraint attempt failed:', constraint, err);
-        }
-    }
-
-    if (!success && iosCamBanner) {
-        iosCamBanner.style.display = 'flex';
+        } catch (err) {}
     }
 }
 
@@ -253,61 +272,42 @@ function triggerSnapshot(e) {
 
     nextQuote();
     renderLiveStamp();
-
     if (!canvas) return;
 
     const vw = (video && video.videoWidth > 0) ? video.videoWidth : 1280;
     const vh = (video && video.videoHeight > 0) ? video.videoHeight : 720;
-    
     canvas.width = vw;
     canvas.height = vh;
-
     const ctx = canvas.getContext('2d');
-    
-    if (facingMode === 'user' && video && video.videoWidth > 0) {
-        ctx.translate(canvas.width, 0);
-        ctx.scale(-1, 1);
-    }
-    
+
     try {
         if (video && video.videoWidth > 0) {
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
         }
     } catch (e) {}
 
-    if (facingMode === 'user' && video && video.videoWidth > 0) {
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-    }
-
     try {
         drawCanvasStamp(ctx, canvas.width, canvas.height);
-    } catch (stampErr) {}
+    } catch (e) {}
 
     try {
         const dataUrl = canvas.toDataURL('image/png');
         if (resultImage) resultImage.src = dataUrl;
-
-        canvas.toBlob((blob) => {
-            capturedBlob = blob;
-        }, 'image/png');
+        canvas.toBlob((blob) => { capturedBlob = blob; }, 'image/png');
 
         if (galleryPreview) {
             galleryPreview.innerHTML = `<img src="${dataUrl}" class="w-full h-full object-cover">`;
         }
-
         if (resultModal) {
             resultModal.classList.remove('hidden');
             resultModal.style.display = 'flex';
             resultModal.style.opacity = '1';
         }
-    } catch (err) {}
+    } catch (e) {}
 }
 
-// Global Unconditional Click Handler for Start & Capture Button
 window.handleStartAndCapture = function(e) {
     if (e) e.preventDefault();
-
-    // 1. Force start stopwatch timer immediately
     isTimerRunning = true;
     if (timerInterval) clearInterval(timerInterval);
     timerInterval = setInterval(() => {
@@ -316,11 +316,9 @@ window.handleStartAndCapture = function(e) {
         renderLiveStamp();
     }, 1000);
 
-    // 2. Rotate to next quote
     nextQuote();
     renderLiveStamp();
 
-    // 3. Immediately trigger camera file picker or snapshot
     const cameraInput = document.getElementById('cameraInput');
     const video = document.getElementById('videoElement');
 
@@ -331,7 +329,6 @@ window.handleStartAndCapture = function(e) {
     }
 };
 
-// Handle File/Native Camera Selection Output
 function handleFileSelect(file) {
     if (!file) return;
     const reader = new FileReader();
@@ -354,15 +351,11 @@ function handleFileSelect(file) {
 
             const dataUrl = canvas.toDataURL('image/png');
             if (resultImage) resultImage.src = dataUrl;
-            
-            canvas.toBlob((blob) => {
-                capturedBlob = blob;
-            }, 'image/png');
+            canvas.toBlob((blob) => { capturedBlob = blob; }, 'image/png');
 
             if (galleryPreview) {
                 galleryPreview.innerHTML = `<img src="${dataUrl}" class="w-full h-full object-cover">`;
             }
-
             if (resultModal) {
                 resultModal.classList.remove('hidden');
                 resultModal.style.display = 'flex';
@@ -374,9 +367,8 @@ function handleFileSelect(file) {
     reader.readAsDataURL(file);
 }
 
-// Global Instant Initialization
+// Auto Startup Engine
 (function initAppNow() {
-    // 1. Start Stopwatch Timer 1s Counter Immediately
     isTimerRunning = true;
     if (timerInterval) clearInterval(timerInterval);
     timerInterval = setInterval(() => {
@@ -385,69 +377,9 @@ function handleFileSelect(file) {
         renderLiveStamp();
     }, 1000);
 
-    // 2. Initial Quote and Live Stamp Render
     updateQuoteUI();
     renderLiveStamp();
-
-    // 3. Auto-Roll Quote every 7s
     setInterval(nextQuote, 7000);
 
-    // 4. Bind Quote Banner Click
-    document.addEventListener('DOMContentLoaded', () => {
-        const quoteBanner = document.getElementById('quoteBanner');
-        if (quoteBanner) quoteBanner.addEventListener('click', nextQuote);
-
-        const cameraInput = document.getElementById('cameraInput');
-        const fileInput = document.getElementById('fileInput');
-
-        if (cameraInput) {
-            cameraInput.addEventListener('change', (e) => {
-                if (e.target.files && e.target.files[0]) {
-                    handleFileSelect(e.target.files[0]);
-                }
-            });
-        }
-
-        if (fileInput) {
-            fileInput.addEventListener('change', (e) => {
-                if (e.target.files && e.target.files[0]) {
-                    handleFileSelect(e.target.files[0]);
-                }
-            });
-        }
-
-        const btnResetTimer = document.getElementById('btnResetTimer');
-        if (btnResetTimer) {
-            btnResetTimer.addEventListener('click', () => {
-                if (confirm('오늘 순공 시간을 초기화하시겠습니까?')) {
-                    timerSeconds = 0;
-                    updateTimerUI();
-                    renderLiveStamp();
-                }
-            });
-        }
-
-        const btnCloseModal = document.getElementById('btnCloseModal');
-        const resultModal = document.getElementById('resultModal');
-        if (btnCloseModal && resultModal) {
-            btnCloseModal.addEventListener('click', () => {
-                resultModal.classList.add('hidden');
-                resultModal.style.display = 'none';
-            });
-        }
-
-        const btnDownload = document.getElementById('btnDownload');
-        if (btnDownload) {
-            btnDownload.addEventListener('click', () => {
-                if (!capturedBlob) return;
-                const link = document.createElement('a');
-                link.download = `timestamp_${Date.now()}.png`;
-                link.href = URL.createObjectURL(capturedBlob);
-                link.click();
-            });
-        }
-    });
-
-    // 5. Try starting webcam/camera stream
     initCamera().catch(() => {});
 })();

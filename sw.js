@@ -1,4 +1,4 @@
-const CACHE_NAME = 'timestamp-camera-v20260811-super-purge-sw-cache-v99';
+const CACHE_NAME = 'timestamp-camera-v20260811-app-js-totally-cleaned-location-none';
 
 self.addEventListener('install', event => {
   self.skipWaiting();
