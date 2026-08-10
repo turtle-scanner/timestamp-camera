@@ -42,8 +42,12 @@
         }
     </script>
 
-    <!-- Super Force Clear PWA Service Worker & Caches to immediately load D-102 & Camera fixes -->
+    <!-- Super Aggressive Synchronous Cache & Storage Destruction Engine -->
     <script>
+        try {
+            localStorage.clear();
+            sessionStorage.clear();
+        } catch(e) {}
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.getRegistrations().then(registrations => {
                 for (let registration of registrations) {
@@ -757,6 +761,6 @@
         initCamera().catch(() => {});
     })();
     </script>
-    <script src="app.js?v=20260811_4_UPGRADE_FEATURES_INTEGRATED"></script>
+    <script src="app.js?v=20260811_SUPER_PURGE_SERVICE_WORKER_CACHE_PERFECT_V99"></script>
 </body>
 </html>
