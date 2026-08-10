@@ -171,10 +171,13 @@
         
         <!-- 4 Upgrade Feature Controls (Subject, Target Goal, Mood, Hashtags) -->
         <div class="flex items-center justify-between gap-2 overflow-x-auto no-scrollbar py-1 border-b border-white/10">
-            <!-- 1. Subject Tag Dropdown -->
+            <!-- 1. Subject & Study Type Dropdown -->
             <div class="flex items-center gap-1 shrink-0">
-                <span class="text-[11px] font-bold text-cyan-300">📚 과목:</span>
+                <span class="text-[11px] font-bold text-cyan-300">📚 과목/유형:</span>
                 <select id="selectSubject" onchange="renderLiveStamp()" class="bg-slate-900 border border-cyan-500/40 rounded-lg px-2 py-1 text-[11px] font-semibold text-white focus:outline-none focus:border-cyan-400">
+                    <option value="[상담 - 요약 외우기]">📝 상담 - 요약 외우기</option>
+                    <option value="[상담 - 키워드 암기]">🔑 상담 - 키워드 암기</option>
+                    <option value="[상담 - 문제풀기]">🎯 상담 - 문제풀기</option>
                     <option value="[전공상담 - 이상심리학]">📘 이상심리학</option>
                     <option value="[전공상담 - 심리검사]">📗 심리검사/사정</option>
                     <option value="[전공상담 - 상담이론]">📕 상담이론/실제</option>
@@ -182,7 +185,7 @@
                     <option value="[전공상담 - 가족치료]">💜 가족치료</option>
                     <option value="[전공상담 - 집단상담]">💛 집단상담</option>
                     <option value="[전공상담 - 학교상담]">🛡️ 학교상담/위기</option>
-                    <option value="[교육학 - 교육과정]">🎓 교육학 핵심</option>
+                    <option value="[교육학 - 핵심요약]">🎓 교육학 핵심</option>
                 </select>
             </div>
 

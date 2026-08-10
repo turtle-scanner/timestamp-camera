@@ -1,4 +1,4 @@
-const CACHE_NAME = 'timestamp-camera-v20260811-target-goal-minutes-hours-perfect';
+const CACHE_NAME = 'timestamp-camera-v20260811-add-3-counseling-study-types';
 
 self.addEventListener('install', event => {
   self.skipWaiting();
