@@ -384,23 +384,77 @@
         }
 
         const counselorQuotes = [
+            { scholar: "DSED 감별진단 팁", theory: "이상심리학 - KICE 공칭명칭", quote: "양육 결핍 + 낯선 성인에 대한 주저함 결여 = 탈억제성 사회관여 장애 (DSED)! 💡" },
+            { scholar: "보웬 다세대가족치료", theory: "가족치료 - 핵심 공칭명칭", quote: "자기분화 = 감정적 반응성을 통제하고 사고와 감정을 분리하는 능력! 🧠" },
+            { scholar: "엘리스 REBT", theory: "상담이론 - 논박 기법", quote: "실용적·실질적 논박 = '그 비합리적 신념이 자신에게 실제 도움이 되는가?' 💡" },
+            { scholar: "미누친 구조적가족치료", theory: "가족치료 - 경계선 사정", quote: "건강한 가족 = 자율성과 연대감이 균형을 이루는 '명확한 경계선'! 🧱" },
+            { scholar: "사회인지진로이론 (SCCT)", theory: "진로상담 - 핵심 변인", quote: "진로 결정 직전 작용하는 환경적 지원/장애 = '진입맥락(근경맥락) 변인'! 🎯" },
+            { scholar: "다브롭스키 과흥분성", theory: "특수아동/상담 - 5대 영역", quote: "지적 과흥분성(지적 호기심) & 정신운동적 과흥분성(신체적 에너제틱)! ⚡" },
             { scholar: "칼 로저스 (Carl Rogers)", theory: "인간중심 상담 - 자아실현", quote: "어느 누구도 나를 바꿀 수 없지만, 나 스스로 완벽한 성장의 힘을 가지고 있다. 🌱" },
             { scholar: "알프레드 아들러 (Alfred Adler)", theory: "개별심리학 - 열등감 보상", quote: "과거의 상처에 갇히지 마라. 우리에겐 목적을 향해 삶을 재창조할 힘이 있다. 🏆" },
-            { scholar: "알버트 엘리스 (Albert Ellis)", theory: "REBT - 합리적 신념", quote: "나를 괴롭히는 것은 시험 자체가 아니라, 반드시 합격해야 한다는 당위적 생각이다. 💡" },
             { scholar: "빅터 프랭클 (Viktor Frankl)", theory: "의미치료 - 실존적 의미", quote: "시련 자체에는 의미가 없지만, 그 시련을 견뎌내는 나의 태도 속에 고귀한 의미가 피어난다. ✨" },
-            { scholar: "아론 벡 (Aaron Beck)", theory: "인지치료 - 자동적 사고 재구조화", quote: "생각을 바꾸면 감정과 행동이 바뀌고, 결국 내 삶과 합격의 미래가 바뀐다. 🧠" },
-            { scholar: "에릭 번 (Eric Berne)", theory: "교류분석 - I'm OK, You're OK", quote: "나는 OK이고 너도 OK이다. 우리는 누구나 수석 합격을 이뤄낼 주인공이다. 👍" },
-            { scholar: "프리츠 펄스 (Fritz Perls)", theory: "게슈탈트 - 지금-여기 (Here & Now)", quote: "과거의 미해결 과제에 집착하지 마라. 지금-여기(Here & Now)에 온전히 깨어있으라. ⚡" },
-            { scholar: "살바도르 미누친 (Minuchin)", theory: "구조적 가족치료 - 명확한 경계선", quote: "명확한 경계선을 세울 때 내 안의 자율성과 연대감이 비로소 피어난다. 🧱" },
-            { scholar: "카를 융 (Carl Jung)", theory: "분석심리학 - 개성화 (Individuation)", quote: "밖을 보는 자는 꿈을 꾸지만, 내면을 들여다보는 자는 비로소 깨어난다. 🌟" },
-            { scholar: "마틴 셀리그만 (Seligman)", theory: "긍정심리학 - PERMA 강점", quote: "학습된 무기력에서 벗어나라. 내 안의 강점과 긍정 정서가 성취의 큰 문을 연다. 🔥" }
+            { scholar: "아론 벡 (Aaron Beck)", theory: "인지치료 - 자동적 사고 재구조화", quote: "생각을 바꾸면 감정과 행동이 바뀌고, 결국 내 삶과 합격의 미래가 바뀐다. 🧠" }
         ];
 
-        // Force purge old localstorage location & nickname keys completely
-        try {
-            localStorage.removeItem('user_location');
-            localStorage.removeItem('user_nickname');
-        } catch (e) {}
+        // --- 1. Consecutive Study Streak Engine ---
+        function getStudyStreakCount() {
+            try {
+                const todayStr = `${getFormattedTime().year}-${getFormattedTime().month}-${getFormattedTime().date}`;
+                const lastDate = localStorage.getItem('last_study_date');
+                let streak = parseInt(localStorage.getItem('study_streak_count') || '1', 10);
+
+                if (!lastDate) {
+                    localStorage.setItem('last_study_date', todayStr);
+                    localStorage.setItem('study_streak_count', '1');
+                    return 1;
+                }
+                if (lastDate === todayStr) return streak;
+
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                const yMonth = String(yesterday.getMonth() + 1).padStart(2, '0');
+                const yDate = String(yesterday.getDate()).padStart(2, '0');
+                const yesterdayStr = `${yesterday.getFullYear()}-${yMonth}-${yDate}`;
+
+                if (lastDate === yesterdayStr) streak += 1;
+                else streak = 1;
+
+                localStorage.setItem('last_study_date', todayStr);
+                localStorage.setItem('study_streak_count', String(streak));
+                return streak;
+            } catch (e) {
+                return 1;
+            }
+        }
+
+        // --- 2. Today Cumulative Study Time Engine ---
+        function getTodayCumulativeSec() {
+            try {
+                const todayStr = `${getFormattedTime().year}-${getFormattedTime().month}-${getFormattedTime().date}`;
+                const savedDate = localStorage.getItem('today_cum_date');
+                let cumSec = parseInt(localStorage.getItem('today_cum_sec') || '0', 10);
+                if (savedDate !== todayStr) return 0;
+                return cumSec;
+            } catch (e) {
+                return 0;
+            }
+        }
+
+        function addTodayCumulativeSec(sec) {
+            try {
+                const todayStr = `${getFormattedTime().year}-${getFormattedTime().month}-${getFormattedTime().date}`;
+                const savedDate = localStorage.getItem('today_cum_date');
+                let cumSec = parseInt(localStorage.getItem('today_cum_sec') || '0', 10);
+                if (savedDate !== todayStr) cumSec = sec;
+                else cumSec += sec;
+
+                localStorage.setItem('today_cum_date', todayStr);
+                localStorage.setItem('today_cum_sec', String(cumSec));
+                return cumSec;
+            } catch (e) {
+                return sec;
+            }
+        }
 
         let currentQuoteIndex = 0;
         let timerSeconds = 0;
@@ -408,8 +462,6 @@
         let timerInterval = null;
         let currentStream = null;
         let facingMode = 'environment';
-        let userNickname = '';
-        let userLocation = '';
         let capturedBlob = null;
         const daysKo = ['일', '월', '화', '수', '목', '금', '토'];
 
@@ -486,6 +538,10 @@
             const goalInfo = getTargetSecAndLabel(selectTargetGoal ? selectTargetGoal.value : '25m');
             const moodTag = selectMood ? selectMood.value : '🔥 열공중';
 
+            const streakCnt = getStudyStreakCount();
+            const totalCumSec = getTodayCumulativeSec() + timerSeconds;
+            const totalCumText = formatTime(totalCumSec);
+
             const progressPct = Math.min(100, Math.round((timerSeconds / goalInfo.targetSec) * 100));
             const studyTimeText = formatTime(timerSeconds);
 
@@ -506,6 +562,7 @@
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-1.5 flex-wrap">
                                 <span class="text-amber-400 font-black text-xs tracking-wider">🏆 2027 전문상담 1차 ${t.dDayText}</span>
+                                <span class="bg-amber-500/20 text-amber-300 border border-amber-400/40 text-[10px] font-bold px-1.5 py-0.5 rounded-md">🔥 ${streakCnt}일 연속 열공</span>
                                 <span class="bg-cyan-500/20 text-cyan-300 border border-cyan-400/40 text-[10px] font-bold px-1.5 py-0.5 rounded-md">${subjectTag}</span>
                                 <span class="bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 text-[10px] font-bold px-1.5 py-0.5 rounded-md">${moodTag}</span>
                             </div>
@@ -513,20 +570,20 @@
                         </div>
                         <div class="flex items-baseline justify-between py-0.5">
                             <span id="stampLiveClock" class="font-display font-black text-2xl text-white tracking-tight leading-none">${t.hours}:${t.minutes}:${t.seconds}</span>
-                            <span id="stampProgressText" class="text-[11px] font-bold text-amber-300">🎯 목표 달성: ${progressPct}% (${studyTimeText}/${goalInfo.label})</span>
+                            <span id="stampProgressText" class="text-[11px] font-bold text-amber-300">🎯 목표: ${progressPct}% (${studyTimeText}/${goalInfo.label}) | ⏱️ 오늘누적: ${totalCumText}</span>
                         </div>
                         <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden border border-white/10">
                             <div id="stampProgressBar" class="bg-gradient-to-r from-cyan-400 via-blue-500 to-amber-400 h-full rounded-full transition-all duration-300" style="width: ${progressPct}%"></div>
                         </div>
                         <div class="flex items-center justify-between text-[10px] text-slate-300 pt-1 border-t border-white/10">
                             <span class="text-cyan-200 font-gowun truncate max-w-[65%]">💡 <b>${qItem.scholar}</b>: "${qItem.quote}"</span>
-                            <span class="text-amber-300 font-bold shrink-0">#${t.dDayText} #상담천개의문</span>
+                            <span class="text-amber-300 font-bold shrink-0">#${t.dDayText} #상담천개의문 #🔥${streakCnt}일차</span>
                         </div>
                     </div>
                 `;
             } else {
                 liveClock.textContent = `${t.hours}:${t.minutes}:${t.seconds}`;
-                if (liveProgressText) liveProgressText.textContent = `🎯 목표 달성: ${progressPct}% (${studyTimeText}/${goalInfo.label})`;
+                if (liveProgressText) liveProgressText.textContent = `🎯 목표: ${progressPct}% (${studyTimeText}/${goalInfo.label}) | ⏱️ 오늘누적: ${totalCumText}`;
                 if (liveProgressBar) liveProgressBar.style.width = `${progressPct}%`;
             }
         }
@@ -543,6 +600,10 @@
                 const subjectTag = selectSubject ? selectSubject.value : '[전공상담 - 이상심리학]';
                 const goalInfo = getTargetSecAndLabel(selectTargetGoal ? selectTargetGoal.value : '25m');
                 const moodTag = selectMood ? selectMood.value : '🔥 열공중';
+
+                const streakCnt = getStudyStreakCount();
+                const totalCumSec = addTodayCumulativeSec(timerSeconds);
+                const totalCumText = formatTime(totalCumSec);
 
                 const progressPct = Math.min(100, Math.round((timerSeconds / goalInfo.targetSec) * 100));
                 const studyTimeText = formatTime(timerSeconds);
@@ -573,12 +634,12 @@
 
                 const marginX = width * 0.04;
 
-                // 1. Top Line: D-Day + Subject Tag + Mood Tag
+                // 1. Top Line: D-Day + Streak Badge + Subject Tag + Mood Tag
                 ctx.fillStyle = '#fbbf24';
                 ctx.font = `800 ${Math.max(16, Math.floor(width * 0.038))}px "Noto Sans KR", sans-serif`;
-                ctx.fillText(`🏆 2027 전문상담 1차 ${t.dDayText}  ${subjectTag}  ${moodTag}`, marginX, height * 0.048);
+                ctx.fillText(`🏆 2027 전문상담 1차 ${t.dDayText}  🔥${streakCnt}일연속  ${subjectTag}  ${moodTag}`, marginX, height * 0.048);
 
-                // 2. Top Subline: Counselor Quote
+                // 2. Top Subline: Counselor Quote & Exam Vaccine Tip
                 ctx.fillStyle = '#67e8f9';
                 ctx.font = `700 ${Math.max(12, Math.floor(width * 0.026))}px "Noto Sans KR", sans-serif`;
                 ctx.fillText(`💡 ${qItem.scholar}: "${qItem.quote}"`, marginX, height * 0.088);
@@ -613,15 +674,15 @@
                 ctx.fillStyle = fillGrad;
                 ctx.fillRect(marginX, barY, activeWidth, barHeight);
 
-                // Subline 3: Progress text + Hashtags
+                // Subline 3: Progress text + Cumulative Time + Hashtags
                 ctx.fillStyle = '#fde047';
                 ctx.font = `700 ${Math.max(11, Math.floor(width * 0.025))}px "Noto Sans KR", sans-serif`;
-                ctx.fillText(`🎯 달성률: ${progressPct}% (${studyTimeText}/${goalInfo.label})`, marginX, height * 0.97);
+                ctx.fillText(`🎯 달성: ${progressPct}% (${studyTimeText}/${goalInfo.label}) | ⏱️ 오늘누적: ${totalCumText}`, marginX, height * 0.97);
 
                 const tagX = width * 0.58;
                 ctx.fillStyle = '#67e8f9';
                 ctx.font = `800 ${Math.max(11, Math.floor(width * 0.025))}px "Noto Sans KR", sans-serif`;
-                ctx.fillText(`#${t.dDayText} #상담천개의문 #합격인증`, tagX, height * 0.97);
+                ctx.fillText(`#${t.dDayText} #상담천개의문 #🔥${streakCnt}일차`, tagX, height * 0.97);
 
                 ctx.restore();
             } catch (e) {}
