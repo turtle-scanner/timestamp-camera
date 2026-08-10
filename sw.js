@@ -1,4 +1,4 @@
-const CACHE_NAME = 'timestamp-camera-v20260811-single-question-quiz-generator-loaded';
+const CACHE_NAME = 'timestamp-camera-v20260811-shutter-button-separated-from-photo';
 
 self.addEventListener('install', event => {
   self.skipWaiting();

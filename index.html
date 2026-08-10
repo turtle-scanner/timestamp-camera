@@ -144,7 +144,7 @@
         <canvas id="snapshotCanvas" class="hidden"></canvas>
 
         <!-- Smartphone Watermark Overlay Placeholder (High-Contrast Floating Card) -->
-        <div id="stampOverlay" class="absolute bottom-28 left-4 right-4 pointer-events-none z-40 transition-all duration-300">
+        <div id="stampOverlay" class="absolute bottom-4 left-4 right-4 pointer-events-none z-40 transition-all duration-300">
             <!-- Dynamic Stamp Rendered via JS -->
         </div>
 
@@ -156,18 +156,20 @@
             </button>
         </div>
 
-        <!-- Right Bottom Floating Thumb Button (Raised Upwards to Prevent Mobile Navigation Bar Clipping) -->
-        <button id="btnStartTimer" onclick="handleStartAndCapture(event)" class="fixed bottom-28 right-4 z-[9999] px-6 py-4 rounded-full font-black text-sm bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-2xl shadow-cyan-500/50 border-2 border-cyan-300 active:scale-90 transition duration-150 flex items-center justify-center gap-2 tracking-tight cursor-pointer" title="공부 시작 & 캡처">
-            <span>▶ 시작 & 📸 촬영</span>
-        </button>
-
         <!-- iOS Fallback Native Camera File Input -->
         <input type="file" id="fileInput" accept="image/*" class="hidden">
         <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden">
     </main>
 
     <!-- Bottom Controls & Upgrade Options (Raised Upwards for Mobile Nav Bars) -->
-    <footer class="relative z-30 bg-slate-950 border-t border-white/10 px-4 pt-3 pb-10 flex flex-col gap-2.5">
+    <footer class="relative z-30 bg-slate-950 border-t border-white/10 px-4 pt-3 pb-8 flex flex-col gap-2.5">
+        
+        <!-- Primary Start & Capture Action Button Bar (Clean & Separated from Photo Viewport) -->
+        <div class="flex items-center justify-center pb-1">
+            <button id="btnStartTimer" onclick="handleStartAndCapture(event)" class="w-full max-w-xs py-3.5 rounded-2xl font-black text-sm bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-xl shadow-cyan-500/30 border border-cyan-300/40 active:scale-95 transition duration-150 flex items-center justify-center gap-2 tracking-tight cursor-pointer">
+                <span>▶ 공부 시작 & 📸 인증샷 촬영</span>
+            </button>
+        </div>
         
         <!-- 4 Upgrade Feature Controls (Subject, Target Goal, Mood, Hashtags) -->
         <div class="flex items-center justify-between gap-2 overflow-x-auto no-scrollbar py-1 border-b border-white/10">
