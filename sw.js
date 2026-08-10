@@ -1,4 +1,4 @@
-const CACHE_NAME = 'timestamp-camera-v20260811-super-clear-d102';
+const CACHE_NAME = 'timestamp-camera-v20260811-laptop-samsung-v1';
 
 self.addEventListener('install', event => {
   self.skipWaiting();

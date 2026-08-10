@@ -114,40 +114,31 @@ document.addEventListener('DOMContentLoaded', () => {
         return `${h}:${m}`;
     }
 
+    // Auto-Start Stopwatch Timer immediately on page load!
+    isTimerRunning = true;
+    if (!studyStartTime) {
+        studyStartTime = getShortTimeStr();
+        localStorage.setItem('study_start_time', studyStartTime);
+    }
+    
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+        timerSeconds++;
+        updateTimerUI();
+        renderLiveStamp();
+    }, 1000);
+
     function updateStartBtnText() {
         if (isTimerRunning) {
-            btnStartTimer.innerHTML = '<span>⏹️ 공부 끝 & 📸 캡처</span>';
-            btnStartTimer.className = 'fixed bottom-20 right-4 z-[9999] px-5 py-4 rounded-full font-black text-sm bg-gradient-to-r from-rose-500 via-pink-600 to-amber-600 hover:from-rose-400 hover:to-amber-500 text-white shadow-2xl shadow-rose-500/50 border-2 border-amber-300 active:scale-90 transition duration-150 flex items-center justify-center gap-2 tracking-tight cursor-pointer';
+            btnStartTimer.innerHTML = '<span>📸 찰칵 사진 촬영하기</span>';
+            btnStartTimer.className = 'fixed bottom-20 right-4 z-[9999] px-6 py-4 rounded-full font-black text-sm bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-2xl shadow-cyan-500/50 border-2 border-cyan-300 active:scale-90 transition duration-150 flex items-center justify-center gap-2 tracking-tight cursor-pointer';
         } else {
             btnStartTimer.innerHTML = '<span>▶ 시작 & 📸 촬영</span>';
-            btnStartTimer.className = 'fixed bottom-20 right-4 z-[9999] px-5 py-4 rounded-full font-black text-sm bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-2xl shadow-cyan-500/50 border-2 border-cyan-300 active:scale-90 transition duration-150 flex items-center justify-center gap-2 tracking-tight cursor-pointer';
         }
     }
     updateStartBtnText();
 
     btnStartTimer.addEventListener('click', (e) => {
-        if (!isTimerRunning) {
-            // 1. Start Study Session
-            isTimerRunning = true;
-            studyStartTime = getShortTimeStr();
-            studyEndTime = null;
-            localStorage.setItem('study_start_time', studyStartTime);
-            localStorage.removeItem('study_end_time');
-
-            timerInterval = setInterval(() => {
-                timerSeconds++;
-                updateTimerUI();
-            }, 1000);
-        } else {
-            // 2. Finish / End Study Session
-            isTimerRunning = false;
-            clearInterval(timerInterval);
-            studyEndTime = getShortTimeStr();
-            localStorage.setItem('study_end_time', studyEndTime);
-        }
-        updateStartBtnText();
-
-        // Trigger snapshot with start/end times engraved!
         triggerSnapshot(e);
     });
 
