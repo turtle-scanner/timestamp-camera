@@ -1,4 +1,4 @@
-const CACHE_NAME = 'timestamp-camera-v20260811-global-click-working';
+const CACHE_NAME = 'timestamp-camera-v20260811-super-rewrite-v100';
 
 self.addEventListener('install', event => {
   self.skipWaiting();
