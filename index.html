@@ -42,11 +42,10 @@
         }
     </script>
 
-    <!-- Super Aggressive Synchronous Cache & Storage Destruction Engine -->
+    <!-- Cache Management Engine -->
     <script>
         try {
-            localStorage.clear();
-            sessionStorage.clear();
+            // Keep localStorage active so study time and shot counters are preserved!
         } catch(e) {}
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.getRegistrations().then(registrations => {
@@ -114,10 +113,12 @@
         </div>
 
         <div class="flex items-center gap-1.5">
-            <button id="btnResetTimer" class="px-3 py-1 rounded-lg text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 active:scale-95 transition">
-                ⏱️ 초기화
+            <button id="btnPauseTimer" onclick="togglePauseTimer()" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-cyan-950/80 hover:bg-cyan-900 text-cyan-300 border border-cyan-500/40 active:scale-95 transition">
+                ⏸️ 일시정지
             </button>
-            <button id="btnPauseTimer" class="hidden"></button>
+            <button id="btnResetTimer" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-400 active:scale-95 transition">
+                초기화
+            </button>
         </div>
     </div>
 
@@ -457,24 +458,36 @@
             }
         }
 
-        function addTodayCumulativeSec(sec) {
+        function saveTodayCumulativeSec(sec) {
             try {
                 const todayStr = `${getFormattedTime().year}-${getFormattedTime().month}-${getFormattedTime().date}`;
-                const savedDate = localStorage.getItem('today_cum_date');
-                let cumSec = parseInt(localStorage.getItem('today_cum_sec') || '0', 10);
-                if (savedDate !== todayStr) cumSec = sec;
-                else cumSec += sec;
-
                 localStorage.setItem('today_cum_date', todayStr);
-                localStorage.setItem('today_cum_sec', String(cumSec));
-                return cumSec;
+                localStorage.setItem('today_cum_sec', String(sec));
+                return sec;
             } catch (e) {
                 return sec;
             }
         }
 
+        function getTodayShotCount() {
+            try {
+                const todayStr = `${getFormattedTime().year}-${getFormattedTime().month}-${getFormattedTime().date}`;
+                return parseInt(localStorage.getItem('today_shots_' + todayStr) || '1', 10);
+            } catch(e) { return 1; }
+        }
+
+        function incrementTodayShotCount() {
+            try {
+                const todayStr = `${getFormattedTime().year}-${getFormattedTime().month}-${getFormattedTime().date}`;
+                const current = parseInt(localStorage.getItem('today_shots_' + todayStr) || '0', 10);
+                const next = current + 1;
+                localStorage.setItem('today_shots_' + todayStr, String(next));
+                return next;
+            } catch(e) { return 1; }
+        }
+
         let currentQuoteIndex = 0;
-        let timerSeconds = 0;
+        let timerSeconds = getTodayCumulativeSec();
         let isTimerRunning = true;
         let timerInterval = null;
         let currentStream = null;
@@ -648,10 +661,9 @@
             }
         }
 
-        function drawCanvasStamp(ctx, width, height) {
+        function drawCanvasStamp(ctx, width, height, currentShotNum) {
             try {
                 const t = getFormattedTime();
-                const qItem = counselorQuotes[currentQuoteIndex] || counselorQuotes[0];
 
                 const selectStampType = document.getElementById('selectStampType');
                 const selectSubject = document.getElementById('selectSubject');
@@ -673,8 +685,8 @@
                 playSuccessChimeSound();
 
                 const streakCnt = getStudyStreakCount();
-                const totalCumSec = addTodayCumulativeSec(timerSeconds);
-                const totalCumText = formatTime(totalCumSec);
+                saveTodayCumulativeSec(timerSeconds);
+                const totalCumText = formatTime(timerSeconds);
                 const weeklyInfo = getWeeklyStampStatus();
 
                 const isStartMode = (stampType === 'start');
@@ -682,47 +694,61 @@
 
                 const progressPct = Math.min(100, Math.round((timerSeconds / goalInfo.targetSec) * 100));
                 const studyTimeText = formatTime(timerSeconds);
+                const shotCount = currentShotNum || getTodayShotCount();
+
+                // 🌟 따뜻한 수험생 응원의 글 (포기하지 않도록)
+                const encourageList = [
+                    "포기하지 마세요. 끝까지 완주한 당신이 반드시 합격합니다. 🌱",
+                    "불안감은 간절함의 증거입니다. 당신은 이미 훌륭한 상담교사입니다. ✨",
+                    "오늘 묵묵히 버텨낸 1분 1초가 합격의 가장 큰 문을 엽니다. 🏆",
+                    "시련을 견뎌내는 당신의 태도 속에 가장 고귀한 합격의 열매가 맺힙니다. 🌟",
+                    "흔들려도 괜찮습니다. 멈추지 않고 한 걸음씩 나아가면 충분합니다. 🔥",
+                    "당신 안에는 상상 이상으로 강하고 완벽한 성장의 힘이 있습니다. 💡",
+                    "천개의 문 중 가장 찬란한 합격의 문을 열 차례입니다. 🔑",
+                    "합격하는 그날까지 끝까지 함께합니다. 오늘도 정말 잘 해내셨습니다! 💛"
+                ];
+                const encourageMsg = encourageList[Math.max(0, shotCount - 1) % encourageList.length];
 
                 ctx.save();
 
-                // 1. 상단 / 하단 자연스러운 비네팅
-                const topBarHeight = height * 0.16;
+                // 🌟 1. 작고 세련된 컴팩트 비네팅 (화면 가림 최소화)
+                const topBarHeight = height * 0.12;
                 const topGrad = ctx.createLinearGradient(0, 0, 0, topBarHeight);
-                topGrad.addColorStop(0, 'rgba(15, 23, 42, 0.88)');
+                topGrad.addColorStop(0, 'rgba(15, 23, 42, 0.85)');
                 topGrad.addColorStop(1, 'rgba(15, 23, 42, 0.0)');
                 ctx.fillStyle = topGrad;
                 ctx.fillRect(0, 0, width, topBarHeight);
 
-                const botBarHeight = height * 0.20;
+                const botBarHeight = height * 0.14;
                 const botGrad = ctx.createLinearGradient(0, height - botBarHeight, 0, height);
                 botGrad.addColorStop(0, 'rgba(15, 23, 42, 0.0)');
-                botGrad.addColorStop(1, 'rgba(15, 23, 42, 0.90)');
+                botGrad.addColorStop(1, 'rgba(15, 23, 42, 0.88)');
                 ctx.fillStyle = botGrad;
                 ctx.fillRect(0, height - botBarHeight, width, botBarHeight);
 
                 ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
-                ctx.shadowBlur = 8;
-                ctx.shadowOffsetX = 2;
-                ctx.shadowOffsetY = 2;
+                ctx.shadowBlur = 6;
+                ctx.shadowOffsetX = 1.5;
+                ctx.shadowOffsetY = 1.5;
 
-                const marginX = width * 0.04;
+                const marginX = width * 0.035;
 
-                // 🌟 2. [천개의 문 1000] 공식 엠블럼 마크 (우측 상단)
-                const badgeWidth = Math.max(160, Math.floor(width * 0.32));
-                const badgeHeight = Math.max(38, Math.floor(height * 0.055));
+                // 🌟 2. [천개의 문 1000] 컴팩트 미니 엠블럼 마크 (우측 상단)
+                const badgeWidth = Math.max(115, Math.floor(width * 0.23));
+                const badgeHeight = Math.max(28, Math.floor(height * 0.040));
                 const badgeX = width - badgeWidth - marginX;
-                const badgeY = height * 0.035;
+                const badgeY = height * 0.022;
 
                 ctx.save();
-                ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
-                ctx.shadowBlur = 10;
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+                ctx.shadowBlur = 8;
                 ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
                 ctx.strokeStyle = '#f59e0b';
-                ctx.lineWidth = Math.max(1.5, Math.floor(width * 0.003));
+                ctx.lineWidth = Math.max(1.2, Math.floor(width * 0.0025));
                 
                 ctx.beginPath();
                 if (ctx.roundRect) {
-                    ctx.roundRect(badgeX, badgeY, badgeWidth, badgeHeight, 14);
+                    ctx.roundRect(badgeX, badgeY, badgeWidth, badgeHeight, 10);
                 } else {
                     ctx.rect(badgeX, badgeY, badgeWidth, badgeHeight);
                 }
@@ -730,46 +756,56 @@
                 ctx.stroke();
 
                 ctx.fillStyle = '#fbbf24';
-                ctx.font = `900 ${Math.max(13, Math.floor(width * 0.032))}px "Noto Sans KR", sans-serif`;
+                ctx.font = `900 ${Math.max(11, Math.floor(width * 0.024))}px "Noto Sans KR", sans-serif`;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText('🚪 천개의 문 1000', badgeX + (badgeWidth / 2), badgeY + (badgeHeight * 0.52));
                 ctx.restore();
 
-                // 3. 좌측 상단: D-Day & 과목 / 컨디션 태그
+                // 🌟 3. 좌측 상단: 컴팩트 3줄 분리 (D-Day / 모드·회차·과목 / 응원의 글)
                 ctx.textAlign = 'left';
                 ctx.textBaseline = 'alphabetic';
+                
+                // 1행: D-Day (작고 정갈하게)
                 ctx.fillStyle = theme.hexMain;
-                ctx.font = `800 ${Math.max(15, Math.floor(width * 0.035))}px "Noto Sans KR", sans-serif`;
-                ctx.fillText(`🏆 2027 전문상담 1차 ${t.dDayText}  [${modeBadgeText}]`, marginX, height * 0.052);
+                ctx.font = `800 ${Math.max(13, Math.floor(width * 0.028))}px "Noto Sans KR", sans-serif`;
+                ctx.fillText(`🏆 2027 전문상담 1차 ${t.dDayText}`, marginX, height * 0.038);
 
+                // 2행: 모드 + 📸 N회차 누적 + 과목 + 컨디션
                 ctx.fillStyle = theme.hexSub;
-                ctx.font = `700 ${Math.max(11, Math.floor(width * 0.024))}px "Noto Sans KR", sans-serif`;
-                ctx.fillText(`${subjectTag}  ${moodTag}  🔥${streakCnt}일연속`, marginX, height * 0.088);
+                ctx.font = `700 ${Math.max(10, Math.floor(width * 0.020))}px "Noto Sans KR", sans-serif`;
+                ctx.fillText(`[${modeBadgeText}] · 📸 ${shotCount}회차 · ${subjectTag} · ${moodTag}`, marginX, height * 0.065);
 
-                // 암기노트 출력
+                // 3행: 💬 감성 충전 응원의 글 (포기하지 않도록!)
+                ctx.fillStyle = '#6ee7b7'; // 민트 에메랄드
+                ctx.font = `600 ${Math.max(9, Math.floor(width * 0.019))}px "Gowun Dodum", sans-serif`;
+                ctx.fillText(`💬 "${encourageMsg}"`, marginX, height * 0.092);
+
+                // 암기노트 출력 (있을 경우만)
                 if (customNote) {
                     ctx.fillStyle = '#fde047';
-                    ctx.font = `800 ${Math.max(11, Math.floor(width * 0.027))}px "Noto Sans KR", sans-serif`;
-                    ctx.fillText(`📝 암기노트: ${customNote}`, marginX, height * 0.83);
+                    ctx.font = `800 ${Math.max(10, Math.floor(width * 0.022))}px "Noto Sans KR", sans-serif`;
+                    ctx.fillText(`📝 암기: ${customNote}`, marginX, height * 0.85);
                 }
 
-                // 4. 하단부: 시계 & 날짜
-                const timeY = height * 0.87;
-                const timeFontSize = Math.max(26, Math.floor(width * 0.068));
+                // 🌟 4. 하단부: 시계 & 날짜 (컴팩트 & 겹침 100% 방지)
+                const timeY = height * 0.90;
+                const timeFontSize = Math.max(20, Math.floor(width * 0.052));
                 ctx.fillStyle = '#ffffff';
                 ctx.font = `900 ${timeFontSize}px "Outfit", sans-serif`;
-                ctx.fillText(`${t.hours}:${t.minutes}:${t.seconds}`, marginX, timeY);
+                const timeStr = `${t.hours}:${t.minutes}:${t.seconds}`;
+                ctx.fillText(timeStr, marginX, timeY);
 
-                const dateX = marginX + (timeFontSize * 3.6);
+                const timeWidth = ctx.measureText(timeStr).width;
+                const dateX = marginX + timeWidth + Math.max(12, width * 0.030);
                 ctx.fillStyle = '#fbbf24';
-                ctx.font = `800 ${Math.max(13, Math.floor(width * 0.032))}px "Noto Sans KR", sans-serif`;
-                ctx.fillText(`(${t.year}.${t.month}.${t.date} ${t.day})`, dateX, timeY - (height * 0.005));
+                ctx.font = `800 ${Math.max(11, Math.floor(width * 0.026))}px "Noto Sans KR", sans-serif`;
+                ctx.fillText(`(${t.year}.${t.month}.${t.date} ${t.day})`, dateX, timeY);
 
-                // 5. 하단 프로그레스 바
-                const barY = height * 0.915;
-                const barWidth = width * 0.92;
-                const barHeight = Math.max(6, Math.floor(height * 0.012));
+                // 🌟 5. 하단 슬림 프로그레스 바
+                const barY = height * 0.932;
+                const barWidth = width * 0.93;
+                const barHeight = Math.max(4, Math.floor(height * 0.008));
 
                 ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
                 ctx.fillRect(marginX, barY, barWidth, barHeight);
@@ -782,18 +818,22 @@
                 ctx.fillStyle = fillGrad;
                 ctx.fillRect(marginX, barY, activeWidth, barHeight);
 
-                // 6. 최하단 정보 & 천개의문1000 해시태그
+                // 🌟 6. 최하단 정보: 좌측(목표/순공) & 우측(해시태그) 양 끝 정렬
+                const bottomY = height * 0.970;
+                ctx.textBaseline = 'alphabetic';
+
+                ctx.textAlign = 'left';
                 ctx.fillStyle = '#fde047';
-                ctx.font = `700 ${Math.max(11, Math.floor(width * 0.024))}px "Noto Sans KR", sans-serif`;
+                ctx.font = `700 ${Math.max(10, Math.floor(width * 0.020))}px "Noto Sans KR", sans-serif`;
                 let printDetailText = isStartMode 
                     ? `🎯 목표: ${goalInfo.label} | ⏱️ 오늘누적: ${totalCumText}`
                     : `⏱️ 실 순공: ${weeklyInfo.elapsedText || studyTimeText}`;
-                ctx.fillText(printDetailText, marginX, height * 0.965);
+                ctx.fillText(printDetailText, marginX, bottomY);
 
-                const tagX = width * 0.48;
+                ctx.textAlign = 'right';
                 ctx.fillStyle = '#67e8f9';
-                ctx.font = `800 ${Math.max(11, Math.floor(width * 0.024))}px "Noto Sans KR", sans-serif`;
-                ctx.fillText(`#${t.dDayText} #천개의문1000 #수석합격`, tagX, height * 0.965);
+                ctx.font = `800 ${Math.max(10, Math.floor(width * 0.020))}px "Noto Sans KR", sans-serif`;
+                ctx.fillText(`#${t.dDayText} #천개의문1000 #수석합격`, width - marginX, bottomY);
 
                 ctx.restore();
             } catch (e) {}
@@ -1030,10 +1070,11 @@
                 ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             }
 
-            // 3. 고화질 스탬프 (천개의 문 1000 마크) 각인
+            // 3. 고화질 스탬프 (천개의 문 1000 마크 & 1, 2, 3 누적 회차 카운터) 각인
+            const shotNum = incrementTodayShotCount();
             ctx.imageSmoothingEnabled = true;
             ctx.imageSmoothingQuality = 'high';
-            drawCanvasStamp(ctx, canvas.width, canvas.height);
+            drawCanvasStamp(ctx, canvas.width, canvas.height, shotNum);
 
             // 4. 고화질 95% JPEG 데이터 변환
             try {
@@ -1055,6 +1096,10 @@
                     galleryPreview.innerHTML = `<img src="${dataUrl}" class="w-full h-full object-cover">`;
                 }
                 if (resultModal) {
+                    const resultTitle = resultModal.querySelector('h2');
+                    if (resultTitle) {
+                        resultTitle.innerHTML = `✅ 📸 오늘 <b>${shotNum}회차</b> 인증샷 완성! (갤러리에 저장됨)`;
+                    }
                     resultModal.classList.remove('hidden');
                     resultModal.style.display = 'flex';
                     resultModal.style.opacity = '1';
@@ -1064,15 +1109,41 @@
             }
         }
 
+        window.togglePauseTimer = function() {
+            const btn = document.getElementById('btnPauseTimer');
+            if (isTimerRunning) {
+                isTimerRunning = false;
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                }
+                saveTodayCumulativeSec(timerSeconds);
+                if (btn) {
+                    btn.innerHTML = '▶️ 계속하기';
+                    btn.className = "px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 border border-emerald-500/40 active:scale-95 transition";
+                }
+            } else {
+                isTimerRunning = true;
+                if (timerInterval) clearInterval(timerInterval);
+                timerInterval = setInterval(() => {
+                    timerSeconds++;
+                    updateTimerUI();
+                    if (timerSeconds % 5 === 0) {
+                        saveTodayCumulativeSec(timerSeconds);
+                    }
+                }, 1000);
+                if (btn) {
+                    btn.innerHTML = '⏸️ 일시정지';
+                    btn.className = "px-2.5 py-1 rounded-lg text-xs font-bold bg-cyan-950/80 hover:bg-cyan-900 text-cyan-300 border border-cyan-500/40 active:scale-95 transition";
+                }
+            }
+        };
+
         window.handleStartAndCapture = function(e) {
             if (e) e.preventDefault();
-            isTimerRunning = true;
-            if (timerInterval) clearInterval(timerInterval);
-            timerInterval = setInterval(() => {
-                timerSeconds++;
-                updateTimerUI();
-                renderLiveStamp();
-            }, 1000);
+            if (!isTimerRunning) {
+                window.togglePauseTimer();
+            }
 
             nextQuote();
             renderLiveStamp();
@@ -1105,7 +1176,8 @@
 
                     nextQuote();
                     renderLiveStamp();
-                    drawCanvasStamp(ctx, canvas.width, canvas.height);
+                    const shotNum = incrementTodayShotCount();
+                    drawCanvasStamp(ctx, canvas.width, canvas.height, shotNum);
 
                     const dataUrl = canvas.toDataURL('image/png');
                     if (resultImage) resultImage.src = dataUrl;
@@ -1125,6 +1197,10 @@
                         galleryPreview.innerHTML = `<img src="${dataUrl}" class="w-full h-full object-cover">`;
                     }
                     if (resultModal) {
+                        const resultTitle = resultModal.querySelector('h2');
+                        if (resultTitle) {
+                            resultTitle.innerHTML = `✅ 📸 오늘 <b>${shotNum}회차</b> 인증샷 완성! (갤러리에 저장됨)`;
+                        }
                         resultModal.classList.remove('hidden');
                         resultModal.style.display = 'flex';
                         resultModal.style.opacity = '1';
@@ -1141,7 +1217,9 @@
         timerInterval = setInterval(() => {
             timerSeconds++;
             updateTimerUI();
-            renderLiveStamp();
+            if (timerSeconds % 5 === 0) {
+                saveTodayCumulativeSec(timerSeconds);
+            }
         }, 1000);
 
         updateQuoteUI();
@@ -1162,8 +1240,9 @@
             const btnResetTimer = document.getElementById('btnResetTimer');
             if (btnResetTimer) {
                 btnResetTimer.addEventListener('click', () => {
-                    if (confirm('오늘 순공 시간을 초기화하시겠습니까?')) {
+                    if (confirm('오늘 순공 시간을 00:00:00으로 초기화하시겠습니까?')) {
                         timerSeconds = 0;
+                        saveTodayCumulativeSec(0);
                         updateTimerUI();
                         renderLiveStamp();
                     }
