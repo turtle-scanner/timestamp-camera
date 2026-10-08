@@ -79,7 +79,7 @@
                     공부 스탬프 📸
                 </h1>
                 <!-- D-Day Indicator in Header -->
-                <span id="headerDDay" class="text-[10px] font-bold text-amber-400">2027 전문상담 1차 D-102</span>
+                <span id="headerDDay" class="text-[10px] font-bold text-amber-400">2027 전문상담 1차 D-51</span>
             </div>
         </div>
         
@@ -107,35 +107,24 @@
     </header>
 
     <!-- Study Stopwatch Bar (Top Floating Control) -->
-    <div class="relative z-30 bg-slate-900/80 backdrop-blur-md px-4 py-2 border-b border-white/10 flex items-center justify-between">
+    <div class="relative z-30 bg-slate-900/80 backdrop-blur-md px-4 py-1.5 border-b border-white/10 flex items-center justify-between">
         <div class="flex items-center gap-2">
             <span class="text-xs font-bold text-cyan-400">⏱️ 오늘 순공:</span>
             <span id="timerDisplay" class="font-display font-black text-lg text-white tracking-wider">00:00:00</span>
         </div>
 
         <div class="flex items-center gap-1.5">
-            <button id="btnResetTimer" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 active:scale-95 transition">
+            <button id="btnResetTimer" class="px-3 py-1 rounded-lg text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 active:scale-95 transition">
                 ⏱️ 초기화
             </button>
             <button id="btnPauseTimer" class="hidden"></button>
         </div>
     </div>
 
-    <!-- Counselor Quote & Theory Banner (Rolling Motivation Bar) -->
-    <div id="quoteBanner" class="relative z-30 bg-gradient-to-r from-cyan-950 via-slate-900 to-indigo-950 px-4 py-2 border-b border-cyan-500/20 flex items-center justify-between cursor-pointer transition hover:bg-slate-900" title="클릭시 다음 심리학자 명언으로 전환">
-        <div class="flex items-center gap-2 overflow-hidden w-full">
-            <span class="text-xs shrink-0 animate-bounce">💡</span>
-            <div class="flex flex-col overflow-hidden w-full">
-                <div class="flex items-center justify-between w-full">
-                    <span id="quoteScholar" class="text-[11px] font-black text-amber-300 truncate">칼 로저스 (Carl Rogers)</span>
-                    <span id="quoteTheory" class="text-[10px] font-bold text-cyan-300 px-1.5 py-0.5 rounded bg-cyan-950/60 shrink-0">인간중심 상담</span>
-                </div>
-                <p id="quoteText" class="text-xs font-semibold text-slate-100 truncate pt-0.5 font-gowun">"어느 누구도 나를 바꿀 수 없지만, 나 스스로 완벽한 성장의 힘을 가지고 있다."</p>
-            </div>
-        </div>
-    </div>
+    <!-- Counselor Quote & Theory Banner (Hidden to maximize camera viewport) -->
+    <div id="quoteBanner" class="hidden"></div>
 
-    <!-- Main Smartphone 9:16 Camera Viewport Container -->
+    <!-- Main Smartphone 9:16 Camera Viewport Container (Maximized Full Height) -->
     <main class="relative flex-1 w-full overflow-hidden bg-slate-950 flex flex-col items-center justify-center">
         
         <!-- Live Video Element for Real Mobile Webcams (iOS Safari Compatible) -->
@@ -143,12 +132,10 @@
         <canvas id="liveViewportCanvas" class="absolute inset-0 w-full h-full object-cover z-0"></canvas>
         <canvas id="snapshotCanvas" class="hidden"></canvas>
 
-        <!-- Smartphone Watermark Overlay Placeholder (High-Contrast Floating Card) -->
-        <div id="stampOverlay" class="absolute bottom-4 left-4 right-4 pointer-events-none z-40 transition-all duration-300">
-            <!-- Dynamic Stamp Rendered via JS -->
-        </div>
+        <!-- Smartphone Watermark Overlay Placeholder (Hidden during live camera view) -->
+        <div id="stampOverlay" class="hidden pointer-events-none"></div>
 
-        <!-- iOS Camera Enable Overlay / Fallback Button (Shows if camera auto-start is blocked by Safari) -->
+        <!-- iOS Camera Enable Overlay / Fallback Button -->
         <div id="iosCamBanner" class="absolute top-4 left-4 right-4 z-40 bg-amber-500/90 text-slate-950 font-bold px-3 py-2 rounded-xl text-xs flex items-center justify-between shadow-lg hidden">
             <span>📱 아이폰 카메라 권한 켜기 / 사진 찍기</span>
             <button id="btnIosCamEnable" class="bg-slate-950 text-amber-300 px-3 py-1 rounded-lg font-black text-xs active:scale-95 transition">
@@ -161,8 +148,8 @@
         <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden">
     </main>
 
-    <!-- Bottom Controls & Upgrade Options (Raised Upwards for Mobile Nav Bars) -->
-    <footer class="relative z-30 bg-slate-950 border-t border-white/10 px-4 pt-3 pb-8 flex flex-col gap-2.5">
+    <!-- Bottom Controls & Upgrade Options (Compact Layout) -->
+    <footer class="relative z-30 bg-slate-950 border-t border-white/10 px-3 pt-2 pb-5 flex flex-col gap-1.5">
         
         <!-- Primary Start & Capture Action Button Bar (Clean & Separated from Photo Viewport) -->
         <div class="flex items-center justify-center pb-1">

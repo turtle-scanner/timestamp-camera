@@ -58,7 +58,7 @@ function getFormattedTime() {
     const seconds = String(now.getSeconds()).padStart(2, '0');
 
     const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const examDate = new Date(2026, 10, 21);
+    const examDate = new Date(2026, 10, 28);
     const diffMs = examDate.getTime() - todayMidnight.getTime();
     const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
     
@@ -93,49 +93,16 @@ function renderLiveStamp() {
     const stampOverlay = document.getElementById('stampOverlay');
     const headerDDay = document.getElementById('headerDDay');
     const t = getFormattedTime();
-    const qItem = counselorQuotes[currentQuoteIndex] || counselorQuotes[0];
-
-    const selectSubject = document.getElementById('selectSubject');
-    const selectTargetGoal = document.getElementById('selectTargetGoal');
-    const selectMood = document.getElementById('selectMood');
-
-    const subjectTag = selectSubject ? selectSubject.value : '[전공상담 - 이상심리학]';
-    const targetHours = selectTargetGoal ? parseInt(selectTargetGoal.value, 10) : 5;
-    const moodTag = selectMood ? selectMood.value : '🔥 열공중';
-
-    const targetSec = targetHours * 3600;
-    const progressPct = Math.min(100, Math.round((timerSeconds / targetSec) * 100));
-    const studyTimeText = formatTime(timerSeconds);
 
     if (headerDDay) {
         headerDDay.textContent = `2027 전문상담 1차 ${t.dDayText}`;
     }
 
-    if (!stampOverlay) return;
-
-    stampOverlay.innerHTML = `
-        <div class="bg-slate-900/85 backdrop-blur-md px-4 py-3 rounded-2xl border border-cyan-500/30 shadow-2xl flex flex-col gap-1.5 text-left">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-1.5 flex-wrap">
-                    <span class="text-amber-400 font-black text-xs tracking-wider">🏆 2027 전문상담 1차 ${t.dDayText}</span>
-                    <span class="bg-cyan-500/20 text-cyan-300 border border-cyan-400/40 text-[10px] font-bold px-1.5 py-0.5 rounded-md">${subjectTag}</span>
-                    <span class="bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 text-[10px] font-bold px-1.5 py-0.5 rounded-md">${moodTag}</span>
-                </div>
-                <span class="text-xs font-bold text-amber-300 shrink-0">${t.year}.${t.month}.${t.date} (${t.day})</span>
-            </div>
-            <div class="flex items-baseline justify-between py-0.5">
-                <span class="font-display font-black text-2xl text-white tracking-tight leading-none">${t.hours}:${t.minutes}:${t.seconds}</span>
-                <span class="text-[11px] font-bold text-amber-300">🎯 목표 달성: ${progressPct}% (${studyTimeText}/${targetHours}시간)</span>
-            </div>
-            <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden border border-white/10">
-                <div class="bg-gradient-to-r from-cyan-400 via-blue-500 to-amber-400 h-full rounded-full transition-all duration-300" style="width: ${progressPct}%"></div>
-            </div>
-            <div class="flex items-center justify-between text-[10px] text-slate-300 pt-1 border-t border-white/10">
-                <span class="text-cyan-200 font-gowun truncate max-w-[65%]">💡 <b>${qItem.scholar}</b>: "${qItem.quote}"</span>
-                <span class="text-amber-300 font-bold shrink-0">#${t.dDayText} #상담천개의문</span>
-            </div>
-        </div>
-    `;
+    // 촬영 전 화면에서는 카메라를 가리지 않도록 스탬프 오버레이 숨김
+    if (stampOverlay) {
+        stampOverlay.innerHTML = '';
+        stampOverlay.style.display = 'none';
+    }
 }
 
 function drawCanvasStamp(ctx, width, height) {
@@ -157,51 +124,82 @@ function drawCanvasStamp(ctx, width, height) {
 
         ctx.save();
 
-        const topBarHeight = height * 0.14;
+        // 1. 상단 / 하단 자연스러운 비네팅
+        const topBarHeight = height * 0.16;
         const topGrad = ctx.createLinearGradient(0, 0, 0, topBarHeight);
         topGrad.addColorStop(0, 'rgba(15, 23, 42, 0.88)');
         topGrad.addColorStop(1, 'rgba(15, 23, 42, 0.0)');
         ctx.fillStyle = topGrad;
         ctx.fillRect(0, 0, width, topBarHeight);
 
-        const botBarHeight = height * 0.18;
+        const botBarHeight = height * 0.20;
         const botGrad = ctx.createLinearGradient(0, height - botBarHeight, 0, height);
         botGrad.addColorStop(0, 'rgba(15, 23, 42, 0.0)');
-        botGrad.addColorStop(1, 'rgba(15, 23, 42, 0.88)');
+        botGrad.addColorStop(1, 'rgba(15, 23, 42, 0.90)');
         ctx.fillStyle = botGrad;
         ctx.fillRect(0, height - botBarHeight, width, botBarHeight);
 
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.95)';
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
         ctx.shadowBlur = 8;
         ctx.shadowOffsetX = 2;
         ctx.shadowOffsetY = 2;
 
         const marginX = width * 0.04;
 
-        // Line 1: D-Day & Tags
+        // 🌟 2. [천개의 문 1000] 공식 엠블럼 마크 (우측 상단)
+        const badgeWidth = Math.max(160, Math.floor(width * 0.32));
+        const badgeHeight = Math.max(38, Math.floor(height * 0.055));
+        const badgeX = width - badgeWidth - marginX;
+        const badgeY = height * 0.035;
+
+        ctx.save();
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+        ctx.shadowBlur = 10;
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = Math.max(1.5, Math.floor(width * 0.003));
+        
+        ctx.beginPath();
+        if (ctx.roundRect) {
+            ctx.roundRect(badgeX, badgeY, badgeWidth, badgeHeight, 14);
+        } else {
+            ctx.rect(badgeX, badgeY, badgeWidth, badgeHeight);
+        }
+        ctx.fill();
+        ctx.stroke();
+
         ctx.fillStyle = '#fbbf24';
-        ctx.font = `800 ${Math.max(16, Math.floor(width * 0.038))}px "Noto Sans KR", sans-serif`;
-        ctx.fillText(`🏆 2027 전문상담 1차 ${t.dDayText}  ${subjectTag}  ${moodTag}`, marginX, height * 0.048);
+        ctx.font = `900 ${Math.max(13, Math.floor(width * 0.032))}px "Noto Sans KR", sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('🚪 천개의 문 1000', badgeX + (badgeWidth / 2), badgeY + (badgeHeight * 0.52));
+        ctx.restore();
 
-        // Line 2: Quote
+        // 3. 좌측 상단: D-Day & 과목 / 컨디션 태그
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillStyle = '#fde047';
+        ctx.font = `800 ${Math.max(15, Math.floor(width * 0.035))}px "Noto Sans KR", sans-serif`;
+        ctx.fillText(`🏆 2027 전문상담 1차 ${t.dDayText}`, marginX, height * 0.052);
+
         ctx.fillStyle = '#67e8f9';
-        ctx.font = `700 ${Math.max(12, Math.floor(width * 0.026))}px "Noto Sans KR", sans-serif`;
-        ctx.fillText(`💡 ${qItem.scholar}: "${qItem.quote}"`, marginX, height * 0.088);
+        ctx.font = `700 ${Math.max(11, Math.floor(width * 0.024))}px "Noto Sans KR", sans-serif`;
+        ctx.fillText(`${subjectTag}  ${moodTag}`, marginX, height * 0.088);
 
-        // Line 3: Time & Date
-        const timeY = height * 0.89;
-        const timeFontSize = Math.max(22, Math.floor(width * 0.060));
+        // 4. 하단부: 시계 & 날짜
+        const timeY = height * 0.87;
+        const timeFontSize = Math.max(26, Math.floor(width * 0.068));
         ctx.fillStyle = '#ffffff';
         ctx.font = `900 ${timeFontSize}px "Outfit", sans-serif`;
         ctx.fillText(`${t.hours}:${t.minutes}:${t.seconds}`, marginX, timeY);
 
-        const dateX = marginX + (timeFontSize * 3.8);
-        ctx.fillStyle = '#fde047';
-        ctx.font = `800 ${Math.max(14, Math.floor(width * 0.035))}px "Noto Sans KR", sans-serif`;
-        ctx.fillText(`(${t.year}.${t.month}.${t.date} ${t.day})`, dateX, timeY - (height * 0.004));
+        const dateX = marginX + (timeFontSize * 3.6);
+        ctx.fillStyle = '#fbbf24';
+        ctx.font = `800 ${Math.max(13, Math.floor(width * 0.032))}px "Noto Sans KR", sans-serif`;
+        ctx.fillText(`(${t.year}.${t.month}.${t.date} ${t.day})`, dateX, timeY - (height * 0.005));
 
-        // Line 4: Progress Bar
-        const barY = height * 0.93;
+        // 5. 하단 프로그레스 바
+        const barY = height * 0.915;
         const barWidth = width * 0.92;
         const barHeight = Math.max(6, Math.floor(height * 0.012));
 
@@ -210,27 +208,27 @@ function drawCanvasStamp(ctx, width, height) {
 
         const activeWidth = (barWidth * progressPct) / 100;
         const fillGrad = ctx.createLinearGradient(marginX, 0, marginX + barWidth, 0);
-        fillGrad.addColorStop(0, '#22d3ee');
+        fillGrad.addColorStop(0, '#06b6d4');
         fillGrad.addColorStop(0.5, '#3b82f6');
-        fillGrad.addColorStop(1, '#fbbf24');
+        fillGrad.addColorStop(1, '#f59e0b');
         ctx.fillStyle = fillGrad;
         ctx.fillRect(marginX, barY, activeWidth, barHeight);
 
-        // Subline 3: Progress text + Hashtags
+        // 6. 최하단 정보 & 천개의문1000 해시태그
         ctx.fillStyle = '#fde047';
-        ctx.font = `700 ${Math.max(11, Math.floor(width * 0.025))}px "Noto Sans KR", sans-serif`;
-        ctx.fillText(`🎯 달성률: ${progressPct}% (${studyTimeText}/${targetHours}h)`, marginX, height * 0.97);
+        ctx.font = `700 ${Math.max(11, Math.floor(width * 0.024))}px "Noto Sans KR", sans-serif`;
+        ctx.fillText(`🎯 목표 달성률: ${progressPct}% (${studyTimeText}/${targetHours}h)`, marginX, height * 0.965);
 
-        const tagX = width * 0.58;
+        const tagX = width * 0.52;
         ctx.fillStyle = '#67e8f9';
-        ctx.font = `800 ${Math.max(11, Math.floor(width * 0.025))}px "Noto Sans KR", sans-serif`;
-        ctx.fillText(`#${t.dDayText} #상담천개의문 #합격인증`, tagX, height * 0.97);
+        ctx.font = `800 ${Math.max(11, Math.floor(width * 0.024))}px "Noto Sans KR", sans-serif`;
+        ctx.fillText(`#${t.dDayText} #천개의문1000 #수석합격`, tagX, height * 0.965);
 
         ctx.restore();
     } catch (e) {}
 }
 
-// Camera Initialization Logic
+// Camera Initialization Logic (4K / FHD High Resolution Prioritized)
 async function initCamera() {
     const video = document.getElementById('videoElement');
     if (!video) return;
@@ -243,9 +241,31 @@ async function initCamera() {
     video.autoplay = true;
 
     const options = [
-        { video: { facingMode: { ideal: 'environment' } }, audio: false },
-        { video: { facingMode: 'environment' }, audio: false },
-        { video: { facingMode: 'user' }, audio: false },
+        {
+            video: {
+                facingMode: { ideal: facingMode },
+                width: { ideal: 3840, min: 1920 },
+                height: { ideal: 2160, min: 1080 }
+            },
+            audio: false
+        },
+        {
+            video: {
+                facingMode: { ideal: facingMode },
+                width: { ideal: 1920 },
+                height: { ideal: 1080 }
+            },
+            audio: false
+        },
+        {
+            video: {
+                facingMode: { ideal: facingMode },
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            },
+            audio: false
+        },
+        { video: { facingMode: facingMode }, audio: false },
         { video: true, audio: false }
     ];
 
@@ -262,8 +282,8 @@ async function initCamera() {
     }
 }
 
-// Core Snapshot Functionality
-function triggerSnapshot(e) {
+// Core High-Definition Snapshot Functionality
+async function triggerSnapshot(e) {
     const video = document.getElementById('videoElement');
     const canvas = document.getElementById('snapshotCanvas');
     const resultModal = document.getElementById('resultModal');
@@ -274,26 +294,42 @@ function triggerSnapshot(e) {
     renderLiveStamp();
     if (!canvas) return;
 
-    const vw = (video && video.videoWidth > 0) ? video.videoWidth : 1280;
-    const vh = (video && video.videoHeight > 0) ? video.videoHeight : 720;
-    canvas.width = vw;
-    canvas.height = vh;
     const ctx = canvas.getContext('2d');
+    let capturedImageSource = false;
 
-    try {
-        if (video && video.videoWidth > 0) {
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    // 🌟 1. 스마트폰 카메라 원본 센서 고화질 촬영 (ImageCapture API 지원 기기)
+    const track = currentStream ? currentStream.getVideoTracks()[0] : null;
+    if (window.ImageCapture && track) {
+        try {
+            const imageCapture = new ImageCapture(track);
+            const photoBlob = await imageCapture.takePhoto();
+            const imageBitmap = await createImageBitmap(photoBlob);
+            canvas.width = imageBitmap.width;
+            canvas.height = imageBitmap.height;
+            ctx.drawImage(imageBitmap, 0, 0);
+            capturedImageSource = true;
+        } catch (err) {
+            console.warn('ImageCapture 폴백 전환:', err);
         }
-    } catch (e) {}
+    }
 
-    try {
-        drawCanvasStamp(ctx, canvas.width, canvas.height);
-    } catch (e) {}
+    // 🌟 2. 미지원 기기 폴백: 비디오 프레임 최고 해상도로 매핑
+    if (!capturedImageSource && video && video.videoWidth > 0) {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    }
 
+    // 3. 고화질 스탬프 (천개의 문 1000 마크) 각인
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    drawCanvasStamp(ctx, canvas.width, canvas.height);
+
+    // 4. 고화질 95% JPEG 데이터 변환
     try {
-        const dataUrl = canvas.toDataURL('image/png');
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
         if (resultImage) resultImage.src = dataUrl;
-        canvas.toBlob((blob) => { capturedBlob = blob; }, 'image/png');
+        canvas.toBlob((blob) => { capturedBlob = blob; }, 'image/jpeg', 0.95);
 
         if (galleryPreview) {
             galleryPreview.innerHTML = `<img src="${dataUrl}" class="w-full h-full object-cover">`;
@@ -303,7 +339,9 @@ function triggerSnapshot(e) {
             resultModal.style.display = 'flex';
             resultModal.style.opacity = '1';
         }
-    } catch (e) {}
+    } catch (e) {
+        console.error('캡처 데이터 변환 오류:', e);
+    }
 }
 
 window.handleStartAndCapture = function(e) {
